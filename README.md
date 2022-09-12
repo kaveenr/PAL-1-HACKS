@@ -16,3 +16,6 @@ Dump of 6502 Assembly code for the PAL-1 SBC.
 ## Programs
 ### `kimio` -> Demonstration Of KIM-1 Onbaord IO
 Using KIM-1 keypad and dispay subroutines built into ROM.
+```
+make -C kimio
+```
