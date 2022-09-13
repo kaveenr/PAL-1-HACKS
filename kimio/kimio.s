@@ -37,7 +37,7 @@ bounce:	jsr GETKEY			; Wait till key is released
 		cmp selkey
 		beq bounce
 		
-		LDA selkey
+		lda selkey
 		
 		cmp #$10			; AD Key is pressed
 		beq a_val
@@ -52,10 +52,14 @@ bounce:	jsr GETKEY			; Wait till key is released
 
 		jmp loop
 
-a_val:
-		lda dig34
-		adc dig12
-		sta dig34
+a_val:	clc					; Clear carry flag
+		lda dig34			; Load current low
+		adc dig12			; Add Selected number
+		sta dig34			; Store low
+		
+		lda dig56			; Load current high
+		adc #$00			; Add 0 with carry
+		sta dig56			; Store high
 		jmp loop
 	
 s_val:
