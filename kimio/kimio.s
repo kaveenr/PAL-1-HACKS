@@ -33,7 +33,7 @@ loop:	jsr SCANDS
 		
 		sta selkey			; Save Selected Valid Key
 
-bounce:	jsr SCANDS
+bounce:	jsr SCANDS			; Keep display lit when debouncing
 		jsr GETKEY			; Wait till key is released
 		cmp selkey
 		beq bounce
@@ -47,20 +47,16 @@ bounce:	jsr SCANDS
 		beq s_val
 	
 		cmp #$14			; PC Key is pressed
+		beq m_val
+			
+		cmp #$12			; + Key is pressed
 		beq c_val
 	
 		sta dig12			; Store valid key press
 
 		jmp loop
 
-a_val:	clc					; Clear carry flag
-		lda dig34			; Load current low
-		adc dig12			; Add Selected number
-		sta dig34			; Store low
-		
-		lda dig56			; Load current high
-		adc #$00			; Add 0 with carry
-		sta dig56			; Store high
+a_val:	jsr r_add
 		jmp loop
 	
 s_val:	sec
@@ -73,8 +69,24 @@ s_val:	sec
 		sta dig56			; Store high
 		jmp loop
 	
-c_val:
-		lda #0
+c_val:	lda #0				; Clear Display
 		sta dig34
 		sta dig56	
 		jmp loop
+
+m_val:	ldx dig12			; Load X with multiplier
+		dex					; Multiple X-1 times
+m_rep:	jsr r_add			; Call Add Subroutine
+		dex
+		bne m_rep			; Keep adding till X zero
+		jmp loop
+		
+r_add:	clc					; Clear carry flag
+		lda dig34			; Load current low
+		adc dig12			; Add Selected number
+		sta dig34			; Store low
+		
+		lda dig56			; Load current high
+		adc #$00			; Add 0 with carry
+		sta dig56			; Store high
+		rts
