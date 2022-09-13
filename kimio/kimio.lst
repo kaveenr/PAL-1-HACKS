@@ -1,0 +1,84 @@
+ca65 V2.18 - N/A
+Main file   : kimio.s
+Current file: kimio.s
+
+000000r 1               ; (2022) Kaveen Rodrigo / ukr.lk
+000000r 1               
+000000r 1               	.setcpu "6502"
+000000r 1               
+000000r 1               ; Reference To ROM Routines In The KIM-1
+000000r 1               
+000000r 1               SCANDS 	=	$1f1f
+000000r 1               GETKEY 	= 	$1f6a
+000000r 1               
+000000r 1               ; Reference to SCANDS values
+000000r 1               
+000000r 1               dig12	=	$f9
+000000r 1               dig34	=	$fa
+000000r 1               dig56	=	$fb
+000000r 1               
+000000r 1               ;		Zero page variables
+000000r 1               selkey	=	$00
+000000r 1               
+000000r 1               ; 		Start program at free RAM.
+000000r 1               		.org 	$0200
+000200  1               
+000200  1  D8           init:	cld					; Clear Decimal
+000201  1  A9 00        		lda #$00			; Initialize SCANDS Values
+000203  1  85 F9        		sta dig12
+000205  1  85 FA        		sta dig34
+000207  1  85 FB        		sta dig56
+000209  1               
+000209  1  20 1F 1F     loop:	jsr SCANDS
+00020C  1  20 6A 1F     		jsr GETKEY
+00020F  1               
+00020F  1  C9 15        		cmp #$15			; Handle no key press
+000211  1  F0 F6        		beq loop
+000213  1               
+000213  1  85 00        		sta selkey			; Save Selected Valid Key
+000215  1               
+000215  1  20 6A 1F     bounce:	jsr GETKEY			; Wait till key is released
+000218  1  C5 00        		cmp selkey
+00021A  1  F0 F9        		beq bounce
+00021C  1               
+00021C  1  A5 00        		lda selkey
+00021E  1               
+00021E  1  C9 10        		cmp #$10			; AD Key is pressed
+000220  1  F0 0D        		beq a_val
+000222  1               
+000222  1  C9 11        		cmp #$11			; DA Key is pressed
+000224  1  F0 19        		beq s_val
+000226  1               
+000226  1  C9 14        		cmp #$14			; PC Key is pressed
+000228  1  F0 25        		beq c_val
+00022A  1               
+00022A  1  85 F9        		sta dig12			; Store valid key press
+00022C  1               
+00022C  1  4C 09 02     		jmp loop
+00022F  1               
+00022F  1  18           a_val:	clc					; Clear carry flag
+000230  1  A5 FA        		lda dig34			; Load current low
+000232  1  65 F9        		adc dig12			; Add Selected number
+000234  1  85 FA        		sta dig34			; Store low
+000236  1               
+000236  1  A5 FB        		lda dig56			; Load current high
+000238  1  69 00        		adc #$00			; Add 0 with carry
+00023A  1  85 FB        		sta dig56			; Store high
+00023C  1  4C 09 02     		jmp loop
+00023F  1               
+00023F  1  38           s_val:	sec
+000240  1  A5 FA        		lda dig34			; Load current low
+000242  1  E5 F9        		sbc dig12			; Deduct Selected number
+000244  1  85 FA        		sta dig34			; Store low
+000246  1               
+000246  1  A5 FB        		lda dig56			; Load current high
+000248  1  E9 00        		sbc #$00			; Deduct 0 with carry
+00024A  1  85 FB        		sta dig56			; Store high
+00024C  1  4C 09 02     		jmp loop
+00024F  1               
+00024F  1               c_val:
+00024F  1  A9 00        		lda #0
+000251  1  85 FA        		sta dig34
+000253  1  85 FB        		sta dig56
+000255  1  4C 09 02     		jmp loop
+000255  1               

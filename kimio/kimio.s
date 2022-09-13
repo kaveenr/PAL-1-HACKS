@@ -62,10 +62,14 @@ a_val:	clc					; Clear carry flag
 		sta dig56			; Store high
 		jmp loop
 	
-s_val:
-		lda dig34
-		sbc dig12
-		sta dig34
+s_val:	sec
+		lda dig34			; Load current low
+		sbc dig12			; Deduct Selected number
+		sta dig34			; Store low
+		
+		lda dig56			; Load current high
+		sbc #$00			; Deduct 0 with carry
+		sta dig56			; Store high
 		jmp loop
 	
 c_val:
