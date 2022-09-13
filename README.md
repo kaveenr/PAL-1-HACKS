@@ -19,3 +19,9 @@ Using KIM-1 keypad and dispay subroutines built into ROM.
 ```
 make -C kimio
 ```
+
+### `hellotty` -> Demonstration Of KIM-1 TTY Routines
+Using KIM-1 ROM TTY related routines
+```
+make -C hellotty
+``

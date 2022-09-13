@@ -1,0 +1,35 @@
+ca65 V2.18 - N/A
+Main file   : hellotty.s
+Current file: hellotty.s
+
+000000r 1               ; (2022) Kaveen Rodrigo / ukr.lk
+000000r 1               
+000000r 1               		.setcpu "6502"
+000000r 1               
+000000r 1               ; 		Reference To ROM Routines In The KIM-1
+000000r 1               		OUTCH 	=	$1EA0
+000000r 1               		OUTSP	=	$1E9E
+000000r 1               		CRLF	=	$1E2F
+000000r 1               		RST		=	$1C22
+000000r 1               
+000000r 1               ; 		Start program at free RAM.
+000000r 1               		.org 	$0200
+000200  1               
+000200  1  20 2F 1E     init:	JSR CRLF		; Send CRLF to TTY
+000203  1               
+000203  1  A2 00        		ldx #0			; Loop over msg untill end
+000205  1               
+000205  1  BD 14 02     loop:	lda msg, X
+000208  1  F0 07        		beq stop
+00020A  1  20 A0 1E     		jsr OUTCH		; Put A to TTY
+00020D  1  E8           		inx
+00020E  1  4C 05 02     		jmp loop
+000211  1               
+000211  1  4C 22 1C     stop:	jmp RST			; Put KIM back to monitor
+000214  1               
+000214  1               ;		Messages to be printed
+000214  1               
+000214  1  48 65 6C 6C  msg:	.asciiz "Hello World, From The PAL-1"
+000218  1  6F 20 57 6F  
+00021C  1  72 6C 64 2C  
+00022F  1               
