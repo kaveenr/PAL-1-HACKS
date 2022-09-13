@@ -13,8 +13,10 @@ dig12	=	$f9
 dig34	=	$fa
 dig56	=	$fb
 
+;		Zero page variables
+selkey	=	$00
 
-; Start program at free RAM.
+; 		Start program at free RAM.
 		.org 	$0200
 
 init:	cld					; Clear Decimal
@@ -28,7 +30,15 @@ loop:	jsr SCANDS
 
 		cmp #$15			; Handle no key press
 		beq loop
-	
+		
+		sta selkey			; Save Selected Valid Key
+
+bounce:	jsr GETKEY			; Wait till key is released
+		cmp selkey
+		beq bounce
+		
+		LDA selkey
+		
 		cmp #$10			; AD Key is pressed
 		beq a_val
 	
