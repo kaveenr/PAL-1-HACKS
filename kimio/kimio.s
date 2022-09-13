@@ -33,7 +33,8 @@ loop:	jsr SCANDS
 		
 		sta selkey			; Save Selected Valid Key
 
-bounce:	jsr GETKEY			; Wait till key is released
+bounce:	jsr SCANDS
+		jsr GETKEY			; Wait till key is released
 		cmp selkey
 		beq bounce
 		

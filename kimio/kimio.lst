@@ -37,48 +37,49 @@ Current file: kimio.s
 000213  1               
 000213  1  85 00        		sta selkey			; Save Selected Valid Key
 000215  1               
-000215  1  20 6A 1F     bounce:	jsr GETKEY			; Wait till key is released
-000218  1  C5 00        		cmp selkey
-00021A  1  F0 F9        		beq bounce
-00021C  1               
-00021C  1  A5 00        		lda selkey
-00021E  1               
-00021E  1  C9 10        		cmp #$10			; AD Key is pressed
-000220  1  F0 0D        		beq a_val
-000222  1               
-000222  1  C9 11        		cmp #$11			; DA Key is pressed
-000224  1  F0 19        		beq s_val
-000226  1               
-000226  1  C9 14        		cmp #$14			; PC Key is pressed
-000228  1  F0 25        		beq c_val
-00022A  1               
-00022A  1  85 F9        		sta dig12			; Store valid key press
-00022C  1               
-00022C  1  4C 09 02     		jmp loop
+000215  1  20 1F 1F     bounce:	jsr SCANDS
+000218  1  20 6A 1F     		jsr GETKEY			; Wait till key is released
+00021B  1  C5 00        		cmp selkey
+00021D  1  F0 F6        		beq bounce
+00021F  1               
+00021F  1  A5 00        		lda selkey
+000221  1               
+000221  1  C9 10        		cmp #$10			; AD Key is pressed
+000223  1  F0 0D        		beq a_val
+000225  1               
+000225  1  C9 11        		cmp #$11			; DA Key is pressed
+000227  1  F0 19        		beq s_val
+000229  1               
+000229  1  C9 14        		cmp #$14			; PC Key is pressed
+00022B  1  F0 25        		beq c_val
+00022D  1               
+00022D  1  85 F9        		sta dig12			; Store valid key press
 00022F  1               
-00022F  1  18           a_val:	clc					; Clear carry flag
-000230  1  A5 FA        		lda dig34			; Load current low
-000232  1  65 F9        		adc dig12			; Add Selected number
-000234  1  85 FA        		sta dig34			; Store low
-000236  1               
-000236  1  A5 FB        		lda dig56			; Load current high
-000238  1  69 00        		adc #$00			; Add 0 with carry
-00023A  1  85 FB        		sta dig56			; Store high
-00023C  1  4C 09 02     		jmp loop
-00023F  1               
-00023F  1  38           s_val:	sec
-000240  1  A5 FA        		lda dig34			; Load current low
-000242  1  E5 F9        		sbc dig12			; Deduct Selected number
-000244  1  85 FA        		sta dig34			; Store low
-000246  1               
-000246  1  A5 FB        		lda dig56			; Load current high
-000248  1  E9 00        		sbc #$00			; Deduct 0 with carry
-00024A  1  85 FB        		sta dig56			; Store high
-00024C  1  4C 09 02     		jmp loop
-00024F  1               
-00024F  1               c_val:
-00024F  1  A9 00        		lda #0
-000251  1  85 FA        		sta dig34
-000253  1  85 FB        		sta dig56
-000255  1  4C 09 02     		jmp loop
-000255  1               
+00022F  1  4C 09 02     		jmp loop
+000232  1               
+000232  1  18           a_val:	clc					; Clear carry flag
+000233  1  A5 FA        		lda dig34			; Load current low
+000235  1  65 F9        		adc dig12			; Add Selected number
+000237  1  85 FA        		sta dig34			; Store low
+000239  1               
+000239  1  A5 FB        		lda dig56			; Load current high
+00023B  1  69 00        		adc #$00			; Add 0 with carry
+00023D  1  85 FB        		sta dig56			; Store high
+00023F  1  4C 09 02     		jmp loop
+000242  1               
+000242  1  38           s_val:	sec
+000243  1  A5 FA        		lda dig34			; Load current low
+000245  1  E5 F9        		sbc dig12			; Deduct Selected number
+000247  1  85 FA        		sta dig34			; Store low
+000249  1               
+000249  1  A5 FB        		lda dig56			; Load current high
+00024B  1  E9 00        		sbc #$00			; Deduct 0 with carry
+00024D  1  85 FB        		sta dig56			; Store high
+00024F  1  4C 09 02     		jmp loop
+000252  1               
+000252  1               c_val:
+000252  1  A9 00        		lda #0
+000254  1  85 FA        		sta dig34
+000256  1  85 FB        		sta dig56
+000258  1  4C 09 02     		jmp loop
+000258  1               
