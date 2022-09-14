@@ -2,34 +2,74 @@ ca65 V2.18 - N/A
 Main file   : hellotty.s
 Current file: hellotty.s
 
-000000r 1               ; (2022) Kaveen Rodrigo / ukr.lk
+000000r 1               ; 			(2022) Kaveen Rodrigo / ukr.lk
 000000r 1               
-000000r 1               		.setcpu "6502"
+000000r 1               			.setcpu "6502"
 000000r 1               
-000000r 1               ; 		Reference To ROM Routines In The KIM-1
-000000r 1               		OUTCH 	=	$1EA0
-000000r 1               		OUTSP	=	$1E9E
-000000r 1               		CRLF	=	$1E2F
-000000r 1               		RST		=	$1C22
+000000r 1               ; 			Reference To ROM Routines In The KIM-1
 000000r 1               
-000000r 1               ; 		Start program at free RAM.
-000000r 1               		.org 	$0200
+000000r 1               			OUTCH 	=	$1EA0
+000000r 1               			OUTSP	=	$1E9E
+000000r 1               			CRLF	=	$1E2F
+000000r 1               			GETCH	=	$1E5A
+000000r 1               			RST		=	$1C22
+000000r 1               
+000000r 1               ;			Zero Page Vars
+000000r 1               
+000000r 1               			PRINTP	=	$00		; Print Text Pointer
+000000r 1               			SAVEA	=	$02
+000000r 1               			SAVEX	=	$03
+000000r 1               			SAVEY	=	$04
+000000r 1               
+000000r 1               ; 			Start program at free RAM.
+000000r 1               
+000000r 1               			.org 	$0200
 000200  1               
-000200  1  20 2F 1E     init:	JSR CRLF		; Send CRLF to TTY
-000203  1               
-000203  1  A2 00        		ldx #0			; Loop over msg untill end
-000205  1               
-000205  1  BD 14 02     loop:	lda msg, X
-000208  1  F0 07        		beq stop
-00020A  1  20 A0 1E     		jsr OUTCH		; Put A to TTY
-00020D  1  E8           		inx
-00020E  1  4C 05 02     		jmp loop
-000211  1               
-000211  1  4C 22 1C     stop:	jmp RST			; Put KIM back to monitor
-000214  1               
-000214  1               ;		Messages to be printed
-000214  1               
-000214  1  48 65 6C 6C  msg:	.asciiz "Hello World, From The PAL-1"
-000218  1  6F 20 57 6F  
-00021C  1  72 6C 64 2C  
-00022F  1               
+000200  1  20 2F 1E     init:		jsr CRLF			; Clear the screen
+000203  1  A9 40        			lda #<msg			; Load the Message adr to pointer
+000205  1  85 00        			sta	PRINTP
+000207  1  A9 02        			lda #>msg
+000209  1  85 01        			sta	PRINTP+1
+00020B  1  20 22 02     			jsr print_str		; jump to print subroutine
+00020E  1               
+00020E  1  20 2F 1E     			jsr CRLF
+000211  1  A9 5D        			lda #<msg1
+000213  1  85 00        			sta	PRINTP
+000215  1  A9 02        			lda #>msg1
+000217  1  85 01        			sta	PRINTP+1
+000219  1  20 22 02     			jsr print_str
+00021C  1               
+00021C  1  20 2F 1E     hault:		jsr CRLF
+00021F  1  4C 22 1C     			jmp RST				; Put KIM back to monitor
+000222  1               
+000222  1               
+000222  1               ;			Print Subroutine
+000222  1               
+000222  1  A0 00        print_str:	ldy #0
+000224  1  B1 00        print_loop:	lda (PRINTP), Y
+000226  1  F0 07        			beq print_stop
+000228  1  20 30 02     			jsr safe_outch
+00022B  1  C8           			iny
+00022C  1  4C 24 02     			jmp print_loop
+00022F  1  60           print_stop:	rts
+000230  1               
+000230  1               
+000230  1  85 02        safe_outch:	sta SAVEA
+000232  1  98           			tya
+000233  1  85 04        			sta SAVEY
+000235  1  A5 02        			lda SAVEA
+000237  1  20 A0 1E     			jsr OUTCH
+00023A  1  A5 04        			lda SAVEY
+00023C  1  A8           			tay
+00023D  1  A5 02        			lda SAVEA
+00023F  1  60           			rts
+000240  1               
+000240  1               ;			Messages to be printed
+000240  1               
+000240  1  48 65 6C 6C  msg:		.asciiz "Hello World, From The PAL-1!"
+000244  1  6F 20 57 6F  
+000248  1  72 6C 64 2C  
+00025D  1  49 27 6D 20  msg1:		.asciiz "I'm Getting a hang of this..."
+000261  1  47 65 74 74  
+000265  1  69 6E 67 20  
+00027A  1               
