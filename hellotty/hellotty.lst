@@ -43,7 +43,7 @@ Current file: hellotty.s
 000216  1  20 32 02     			jsr input_num		; get number
 000219  1  AA           			tax					; load to x registry
 00021A  1               
-00021A  1  A9 91        num_loop:	lda #<msg3			; Load greeter addr to print pointer
+00021A  1  A9 91        @loop:		lda #<msg3			; Load greeter addr to print pointer
 00021C  1  85 00        			sta	PRINTP
 00021E  1  A9 02        			lda #>msg3
 000220  1  85 01        			sta	PRINTP+1
@@ -54,7 +54,7 @@ Current file: hellotty.s
 000229  1               
 000229  1  CA           			dex
 00022A  1  F0 03        			beq hault
-00022C  1  4C 1A 02     			jmp num_loop
+00022C  1  4C 1A 02     			jmp @loop
 00022F  1               
 00022F  1  4C 22 1C     hault:		jmp RST				; Put KIM back to monitor
 000232  1               
@@ -75,12 +75,12 @@ Current file: hellotty.s
 000242  1  60           			rts
 000243  1               
 000243  1  A0 00        print_str:	ldy #0
-000245  1  B1 00        print_loop:	lda (PRINTP), Y		; Indirect ref print pointer with Y offset
-000247  1  F0 07        			beq print_stop
+000245  1  B1 00        @loop:		lda (PRINTP), Y		; Indirect ref print pointer with Y offset
+000247  1  F0 07        			beq @stop
 000249  1  20 51 02     			jsr safe_outch		; Print char
 00024C  1  C8           			iny
-00024D  1  4C 45 02     			jmp print_loop
-000250  1  60           print_stop:	rts
+00024D  1  4C 45 02     			jmp @loop
+000250  1  60           @stop:		rts
 000251  1               
 000251  1               
 000251  1  85 02        safe_outch:	sta SAVEA			; Retain A, X, Y
