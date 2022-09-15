@@ -6,18 +6,21 @@ Current file: hellotty.s
 000000r 1               
 000000r 1               			.setcpu "6502"
 000000r 1               
+000000r 1               ;			Constants For ASCII
+000000r 1               
+000000r 1               			CR      = 	$0D		; Carriage Return
+000000r 1                 		  	LF      = 	$0A		; Line Feed
+000000r 1               
 000000r 1               ; 			Reference To ROM Routines In The KIM-1
 000000r 1               
-000000r 1               			OUTCH 	=	$1EA0
-000000r 1               			OUTSP	=	$1E9E
-000000r 1               			CRLF	=	$1E2F
-000000r 1               			GETCH	=	$1E5A
-000000r 1               			RST		=	$1C22
+000000r 1               			OUTCH 	=	$1EA0	; Print A to TTY
+000000r 1               			GETCH	=	$1E5A	; Load Chart A
+000000r 1               			RST		=	$1C22	; Reset to monitor
 000000r 1               
 000000r 1               ;			Zero Page Vars
 000000r 1               
 000000r 1               			PRINTP	=	$00		; Print Text Pointer
-000000r 1               			SAVEA	=	$02
+000000r 1               			SAVEA	=	$02		; Save states for registers
 000000r 1               			SAVEX	=	$03
 000000r 1               			SAVEY	=	$04
 000000r 1               
@@ -25,51 +28,84 @@ Current file: hellotty.s
 000000r 1               
 000000r 1               			.org 	$0200
 000200  1               
-000200  1  20 2F 1E     init:		jsr CRLF			; Clear the screen
-000203  1  A9 40        			lda #<msg			; Load the Message adr to pointer
-000205  1  85 00        			sta	PRINTP
-000207  1  A9 02        			lda #>msg
-000209  1  85 01        			sta	PRINTP+1
-00020B  1  20 22 02     			jsr print_str		; jump to print subroutine
-00020E  1               
-00020E  1  20 2F 1E     			jsr CRLF
-000211  1  A9 5D        			lda #<msg1
-000213  1  85 00        			sta	PRINTP
-000215  1  A9 02        			lda #>msg1
-000217  1  85 01        			sta	PRINTP+1
-000219  1  20 22 02     			jsr print_str
-00021C  1               
-00021C  1  20 2F 1E     hault:		jsr CRLF
-00021F  1  4C 22 1C     			jmp RST				; Put KIM back to monitor
-000222  1               
-000222  1               
-000222  1               ;			Print Subroutine
-000222  1               
-000222  1  A0 00        print_str:	ldy #0
-000224  1  B1 00        print_loop:	lda (PRINTP), Y
-000226  1  F0 07        			beq print_stop
-000228  1  20 30 02     			jsr safe_outch
-00022B  1  C8           			iny
-00022C  1  4C 24 02     			jmp print_loop
-00022F  1  60           print_stop:	rts
-000230  1               
-000230  1               
-000230  1  85 02        safe_outch:	sta SAVEA
-000232  1  98           			tya
-000233  1  85 04        			sta SAVEY
-000235  1  A5 02        			lda SAVEA
-000237  1  20 A0 1E     			jsr OUTCH
-00023A  1  A5 04        			lda SAVEY
-00023C  1  A8           			tay
-00023D  1  A5 02        			lda SAVEA
-00023F  1  60           			rts
-000240  1               
-000240  1               ;			Messages to be printed
-000240  1               
-000240  1  48 65 6C 6C  msg:		.asciiz "Hello World, From The PAL-1!"
-000244  1  6F 20 57 6F  
-000248  1  72 6C 64 2C  
-00025D  1  49 27 6D 20  msg1:		.asciiz "I'm Getting a hang of this..."
-000261  1  47 65 74 74  
-000265  1  69 6E 67 20  
-00027A  1               
+000200  1  A9 67        init:		lda #<msg			; Load the msg addr to print pointer
+000202  1  85 00        			sta	PRINTP
+000204  1  A9 02        			lda #>msg
+000206  1  85 01        			sta	PRINTP+1
+000208  1  20 43 02     			jsr print_str		; jump to print subroutine
+00020B  1               
+00020B  1  A9 86        			lda #<msg1			; print prompt
+00020D  1  85 00        			sta	PRINTP
+00020F  1  A9 02        			lda #>msg1
+000211  1  85 01        			sta	PRINTP+1
+000213  1  20 43 02     			jsr print_str
+000216  1               
+000216  1  20 32 02     			jsr input_num		; get number
+000219  1  AA           			tax					; load to x registry
+00021A  1               
+00021A  1  A9 91        num_loop:	lda #<msg3			; Load greeter addr to print pointer
+00021C  1  85 00        			sta	PRINTP
+00021E  1  A9 02        			lda #>msg3
+000220  1  85 01        			sta	PRINTP+1
+000222  1  20 43 02     			jsr print_str		; print msg3
+000225  1               
+000225  1  8A           			txa					; Print X
+000226  1  20 39 02     			jsr print_num
+000229  1               
+000229  1  CA           			dex
+00022A  1  F0 03        			beq hault
+00022C  1  4C 1A 02     			jmp num_loop
+00022F  1               
+00022F  1  4C 22 1C     hault:		jmp RST				; Put KIM back to monitor
+000232  1               
+000232  1               
+000232  1               ;			Input Subroutines
+000232  1               
+000232  1  20 5A 1E     input_num:	jsr GETCH			; Get Char
+000235  1  38           			sec					; Set Carry Flag
+000236  1  E9 30        			sbc #$30			; Deduct ASCII offset
+000238  1  60           			rts
+000239  1               
+000239  1               ;			Print Subroutines
+000239  1               
+000239  1  85 02        print_num:	sta SAVEA			; Retain A
+00023B  1  69 30        			adc #$30			; ASCII number offset
+00023D  1  20 51 02     			jsr safe_outch		; Print A
+000240  1  A5 02        			lda	SAVEA			; Put A back
+000242  1  60           			rts
+000243  1               
+000243  1  A0 00        print_str:	ldy #0
+000245  1  B1 00        print_loop:	lda (PRINTP), Y		; Indirect ref print pointer with Y offset
+000247  1  F0 07        			beq print_stop
+000249  1  20 51 02     			jsr safe_outch		; Print char
+00024C  1  C8           			iny
+00024D  1  4C 45 02     			jmp print_loop
+000250  1  60           print_stop:	rts
+000251  1               
+000251  1               
+000251  1  85 02        safe_outch:	sta SAVEA			; Retain A, X, Y
+000253  1  8A           			txa
+000254  1  85 03        			sta SAVEX
+000256  1  98           			tya
+000257  1  85 04        			sta SAVEY
+000259  1  A5 02        			lda SAVEA
+00025B  1  20 A0 1E     			jsr OUTCH			; Print A
+00025E  1  A5 03        			lda SAVEX			; Put A, X, Y back
+000260  1  AA           			tax
+000261  1  A5 04        			lda SAVEY
+000263  1  A8           			tay
+000264  1  A5 02        			lda SAVEA
+000266  1  60           			rts
+000267  1               
+000267  1               ;			Messages to be printed
+000267  1               
+000267  1  0D 0A 48 65  msg:		.byte CR, LF,"Hello World, From The PAL-1!", 0
+00026B  1  6C 6C 6F 20  
+00026F  1  57 6F 72 6C  
+000286  1  0D 0A 4E 75  msg1:		.byte CR, LF,"Number: ", 0
+00028A  1  6D 62 65 72  
+00028E  1  3A 20 00     
+000291  1  0D 0A 47 72  msg3:		.byte CR, LF, "Greeting You ", 0
+000295  1  65 65 74 69  
+000299  1  6E 67 20 59  
+0002A0  1               
