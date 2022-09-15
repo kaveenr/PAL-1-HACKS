@@ -4,94 +4,94 @@ Current file: kimio.s
 
 000000r 1               ; (2022) Kaveen Rodrigo / ukr.lk
 000000r 1               
-000000r 1               	.setcpu "6502"
+000000r 1                   .setcpu "6502"
 000000r 1               
 000000r 1               ; Reference To ROM Routines In The KIM-1
 000000r 1               
-000000r 1               SCANDS 	=	$1f1f
-000000r 1               GETKEY 	= 	$1f6a
+000000r 1               SCANDS     =    $1f1f
+000000r 1               GETKEY     =     $1f6a
 000000r 1               
 000000r 1               ; Reference to SCANDS values
 000000r 1               
-000000r 1               dig12	=	$f9
-000000r 1               dig34	=	$fa
-000000r 1               dig56	=	$fb
+000000r 1               dig12    =    $f9
+000000r 1               dig34    =    $fa
+000000r 1               dig56    =    $fb
 000000r 1               
-000000r 1               ;		Zero page variables
-000000r 1               selkey	=	$00
+000000r 1               ; Zero page variables
+000000r 1               selkey    =    $00
 000000r 1               
-000000r 1               ; 		Start program at free RAM.
-000000r 1               		.org 	$0200
+000000r 1               ; Start program at free RAM.
+000000r 1                       .org     $0200
 000200  1               
-000200  1  D8           init:	cld					; Clear Decimal
-000201  1  A9 00        		lda #$00			; Initialize SCANDS Values
-000203  1  85 F9        		sta dig12
-000205  1  85 FA        		sta dig34
-000207  1  85 FB        		sta dig56
+000200  1  D8           init:   cld                     ; Clear Decimal
+000201  1  A9 00                lda #$00                ; Initialize SCANDS Values
+000203  1  85 F9                sta dig12
+000205  1  85 FA                sta dig34
+000207  1  85 FB                sta dig56
 000209  1               
-000209  1  20 1F 1F     loop:	jsr SCANDS
-00020C  1  20 6A 1F     		jsr GETKEY
+000209  1  20 1F 1F     loop:   jsr SCANDS
+00020C  1  20 6A 1F             jsr GETKEY
 00020F  1               
-00020F  1  C9 15        		cmp #$15			; Handle no key press
-000211  1  F0 F6        		beq loop
+00020F  1  C9 15                cmp #$15                ; Handle no key press
+000211  1  F0 F6                beq loop
 000213  1               
-000213  1  85 00        		sta selkey			; Save Selected Valid Key
+000213  1  85 00                sta selkey              ; Save Selected Valid Key
 000215  1               
-000215  1  20 1F 1F     bounce:	jsr SCANDS			; Keep display lit when debouncing
-000218  1  20 6A 1F     		jsr GETKEY			; Wait till key is released
-00021B  1  C5 00        		cmp selkey
-00021D  1  F0 F6        		beq bounce
+000215  1  20 1F 1F     bounce: jsr SCANDS              ; Keep display lit when debouncing
+000218  1  20 6A 1F             jsr GETKEY              ; Wait till key is released
+00021B  1  C5 00                cmp selkey
+00021D  1  F0 F6                beq bounce
 00021F  1               
-00021F  1  A5 00        		lda selkey
+00021F  1  A5 00                lda selkey
 000221  1               
-000221  1  C9 10        		cmp #$10			; AD Key is pressed
-000223  1  F0 11        		beq a_val
+000221  1  C9 10                cmp #$10                ; AD Key is pressed
+000223  1  F0 11                beq a_val
 000225  1               
-000225  1  C9 11        		cmp #$11			; DA Key is pressed
-000227  1  F0 13        		beq s_val
+000225  1  C9 11                cmp #$11                ; DA Key is pressed
+000227  1  F0 13                beq s_val
 000229  1               
-000229  1  C9 14        		cmp #$14			; PC Key is pressed
-00022B  1  F0 28        		beq m_val
+000229  1  C9 14                cmp #$14                ; PC Key is pressed
+00022B  1  F0 28                beq m_val
 00022D  1               
-00022D  1  C9 12        		cmp #$12			; + Key is pressed
-00022F  1  F0 1B        		beq c_val
+00022D  1  C9 12                cmp #$12                ; + Key is pressed
+00022F  1  F0 1B                beq c_val
 000231  1               
-000231  1  85 F9        		sta dig12			; Store valid key press
+000231  1  85 F9                sta dig12               ; Store valid key press
 000233  1               
-000233  1  4C 09 02     		jmp loop
+000233  1  4C 09 02             jmp loop
 000236  1               
-000236  1  20 61 02     a_val:	jsr r_add
-000239  1  4C 09 02     		jmp loop
+000236  1  20 61 02     a_val:  jsr r_add
+000239  1  4C 09 02             jmp loop
 00023C  1               
-00023C  1  38           s_val:	sec
-00023D  1  A5 FA        		lda dig34			; Load current low
-00023F  1  E5 F9        		sbc dig12			; Deduct Selected number
-000241  1  85 FA        		sta dig34			; Store low
+00023C  1  38           s_val:  sec
+00023D  1  A5 FA                lda dig34               ; Load current low
+00023F  1  E5 F9                sbc dig12               ; Deduct Selected number
+000241  1  85 FA                sta dig34               ; Store low
 000243  1               
-000243  1  A5 FB        		lda dig56			; Load current high
-000245  1  E9 00        		sbc #$00			; Deduct 0 with carry
-000247  1  85 FB        		sta dig56			; Store high
-000249  1  4C 09 02     		jmp loop
+000243  1  A5 FB                lda dig56               ; Load current high
+000245  1  E9 00                sbc #$00                ; Deduct 0 with carry
+000247  1  85 FB                sta dig56               ; Store high
+000249  1  4C 09 02             jmp loop
 00024C  1               
-00024C  1  A9 00        c_val:	lda #0				; Clear Display
-00024E  1  85 FA        		sta dig34
-000250  1  85 FB        		sta dig56
-000252  1  4C 09 02     		jmp loop
+00024C  1  A9 00        c_val:  lda #0                  ; Clear Display
+00024E  1  85 FA                sta dig34
+000250  1  85 FB                sta dig56
+000252  1  4C 09 02             jmp loop
 000255  1               
-000255  1  A6 F9        m_val:	ldx dig12			; Load X with multiplier
-000257  1  CA           		dex					; Multiple X-1 times
-000258  1  20 61 02     m_rep:	jsr r_add			; Call Add Subroutine
-00025B  1  CA           		dex
-00025C  1  D0 FA        		bne m_rep			; Keep adding till X zero
-00025E  1  4C 09 02     		jmp loop
+000255  1  A6 F9        m_val:  ldx dig12               ; Load X with multiplier
+000257  1  CA                   dex                     ; Multiple X-1 times
+000258  1  20 61 02     m_rep:  jsr r_add               ; Call Add Subroutine
+00025B  1  CA                   dex
+00025C  1  D0 FA                bne m_rep               ; Keep adding till X zero
+00025E  1  4C 09 02             jmp loop
 000261  1               
-000261  1  18           r_add:	clc					; Clear carry flag
-000262  1  A5 FA        		lda dig34			; Load current low
-000264  1  65 F9        		adc dig12			; Add Selected number
-000266  1  85 FA        		sta dig34			; Store low
+000261  1  18           r_add:    clc                    ; Clear carry flag
+000262  1  A5 FA                lda dig34            ; Load current low
+000264  1  65 F9                adc dig12            ; Add Selected number
+000266  1  85 FA                sta dig34            ; Store low
 000268  1               
-000268  1  A5 FB        		lda dig56			; Load current high
-00026A  1  69 00        		adc #$00			; Add 0 with carry
-00026C  1  85 FB        		sta dig56			; Store high
-00026E  1  60           		rts
+000268  1  A5 FB                lda dig56            ; Load current high
+00026A  1  69 00                adc #$00            ; Add 0 with carry
+00026C  1  85 FB                sta dig56            ; Store high
+00026E  1  60                   rts
 00026E  1               
