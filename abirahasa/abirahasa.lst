@@ -390,49 +390,78 @@ Current file: abirahasa.s
 000466  1                           ;      Ca    Na    Ea    Sa    Wa    Pc    Gd    Gp     Desc ptr.
 000466  1  04 70 00 00  game:       .byte (>@1),(<@1),(0  ),(0  ),(0  ),(0  ),(0  ),(0  ),  (<@t1),(>@t1)
 00046A  1  00 00 00 00  
-00046E  1  90 04        
+00046E  1  A6 04        
 000470  1  04 86 00 00  @1:         .byte (>@1),(<@3),(0  ),(0  ),(<@2),(0  ),('N'),('K'),  (<@t2),(>@t2), (<@e1),(>@e1)
 000474  1  7C 00 4E 4B  
-000478  1  18 05 E5 06  
+000478  1  2E 05 A8 08  
 00047C  1  04 00 70 00  @2:         .byte (>@1),(0  ),(<@1),(0  ),(0  ),('K'),(0  ),(0  ),  (<@t3),(>@t3)
 000480  1  00 4B 00 00  
-000484  1  B2 05        
-000486  1  00 00 00 00  @3:         .byte (0  ),(0  ),(0  ),(0  ),(0  ),(0  ),(0  ),(0  ),  (<@t4),(>@t4)
-00048A  1  00 00 00 00  
-00048E  1  76 06        
-000490  1               
-000490  1  59 6F 75 27  @t1:        .byte "You're at the side of an empty road, north of you is a foot path..."
-000494  1  72 65 20 61  
-000498  1  74 20 74 68  
-0004D3  1  0D 0A 54 68              .byte CR,LF,"There is a sign that says 'Welcome To Abirahasa' next to the path.",0
-0004D7  1  65 72 65 20  
-0004DB  1  69 73 20 61  
-000518  1               
-000518  1  59 6F 75 20  @t2:        .byte "You walk along, to find a clearing with an old house, it looks uninhabited."
-00051C  1  77 61 6C 6B  
-000520  1  20 61 6C 6F  
-000563  1  0D 0A 53 68              .byte CR,LF,"Shaking the door knob reveal that it's locked. Off to the left is an garage.",0
-000567  1  61 6B 69 6E  
-00056B  1  67 20 74 68  
-0005B2  1               
-0005B2  1  59 6F 75 20  @t3:        .byte "You walk into the garage to see an old Volkswagen Karmann Ghia covered in dust."
-0005B6  1  77 61 6C 6B  
-0005BA  1  20 69 6E 74  
-000601  1  0D 0A 41 74              .byte CR,LF,"At the back is a bench with broken car parts."
-000605  1  20 74 68 65  
-000609  1  20 62 61 63  
-000630  1  0D 0A 59 6F              .byte CR,LF,"You go closer to see a jar full of bolts... Shining in it is a key!",0
-000634  1  75 20 67 6F  
-000638  1  20 63 6C 6F  
-000676  1               
-000676  1  41 66 74 65  @t4:        .byte "After opening the door with hesitation, you're in an untidy living room."
-00067A  1  72 20 6F 70  
-00067E  1  65 6E 69 6E  
-0006BE  1  0D 0A 54 4F              .byte CR,LF,"TODO says the ghost! Oooohohhohohoo!", 0
-0006C2  1  44 4F 20 73  
-0006C6  1  61 79 73 20  
-0006E5  1               
-0006E5  1  44 6F 6F 72  @e1:        .byte "Door is locked, you need to USE a key!",0
-0006E9  1  20 69 73 20  
-0006ED  1  6C 6F 63 6B  
-00070B  1               
+000484  1  C8 05        
+000486  1  04 9C 92 00  @3:         .byte (>@3),(<@5),(<@4),(0  ),(0  ),(0  ),('N'),('L'),  (<@t4),(>@t4), (<@e2),(>@e2)
+00048A  1  00 00 4E 4C  
+00048E  1  8C 06 CF 08  
+000492  1  04 00 00 00  @4:         .byte (>@3),(0  ),(0  ),(0  ),(<@3),('L'),(0  ),(0  ),  (<@t5),(>@t5)
+000496  1  86 4C 00 00  
+00049A  1  41 07        
+00049C  1  00 00 00 00  @5:         .byte (0  ),(0  ),(0  ),(0  ),(0  ),(0  ),(0  ),(0  ),  (<@t6),(>@t6)
+0004A0  1  00 00 00 00  
+0004A4  1  C9 07        
+0004A6  1               
+0004A6  1  59 6F 75 27  @t1:        .byte "You're at the side of an empty road, north of you is a foot path..."
+0004AA  1  72 65 20 61  
+0004AE  1  74 20 74 68  
+0004E9  1  0D 0A 54 68              .byte CR,LF,"There is a sign that says 'Welcome To Abirahasa' next to the path.",0
+0004ED  1  65 72 65 20  
+0004F1  1  69 73 20 61  
+00052E  1               
+00052E  1  59 6F 75 20  @t2:        .byte "You walk along, to find a clearing with an old house, it looks uninhabited."
+000532  1  77 61 6C 6B  
+000536  1  20 61 6C 6F  
+000579  1  0D 0A 53 68              .byte CR,LF,"Shaking the door knob reveal that it's locked. Off to the left is an garage.",0
+00057D  1  61 6B 69 6E  
+000581  1  67 20 74 68  
+0005C8  1               
+0005C8  1  59 6F 75 20  @t3:        .byte "You walk into the garage to see an old Volkswagen Karmann Ghia covered in dust."
+0005CC  1  77 61 6C 6B  
+0005D0  1  20 69 6E 74  
+000617  1  0D 0A 41 74              .byte CR,LF,"At the back is a bench with broken car parts."
+00061B  1  20 74 68 65  
+00061F  1  20 62 61 63  
+000646  1  0D 0A 59 6F              .byte CR,LF,"You go closer to see a jar full of bolts... Shining in it is a key!",0
+00064A  1  75 20 67 6F  
+00064E  1  20 63 6C 6F  
+00068C  1               
+00068C  1  57 69 74 68  @t4:        .byte "With hesitation the door creaks open to a dingy and dusty living room..."
+000690  1  20 68 65 73  
+000694  1  69 74 61 74  
+0006D4  1  0D 0A 49 74              .byte CR,LF,"It's much bigger space that anticipated, ahead is darkness."
+0006D8  1  27 73 20 6D  
+0006DC  1  75 63 68 20  
+000711  1  0D 0A 54 68              .byte CR,LF,"There seems to be a kitchen area to the right", 0
+000715  1  65 72 65 20  
+000719  1  73 65 65 6D  
+000741  1               
+000741  1  59 6F 75 20  @t5:        .byte "You break the cobwebs and navigate to the kitchen, there is a book on the table"
+000745  1  62 72 65 61  
+000749  1  6B 20 74 68  
+000790  1  0D 0A 74 68              .byte CR,LF,"the cover seems familiar to you. Next to it is a lamp.",0
+000794  1  65 20 63 6F  
+000798  1  76 65 72 20  
+0007C9  1               
+0007C9  1  57 69 74 68  @t6:        .byte "With the light of the lamp, you navigate to an open door way which leads down."
+0007CD  1  20 74 68 65  
+0007D1  1  20 6C 69 67  
+000817  1  0D 0A 54 68              .byte CR,LF,"The floorboards creak as you take every step. You're shocked to see a lit candle"
+00081B  1  65 20 66 6C  
+00081F  1  6F 6F 72 62  
+000869  1  0D 0A 6F 6E              .byte CR,LF,"on the table in the corner. No one seems to be here through!",0
+00086D  1  20 74 68 65  
+000871  1  20 74 61 62  
+0008A8  1               
+0008A8  1  44 6F 6F 72  @e1:        .byte "Door is locked, you need to USE a key!",0
+0008AC  1  20 69 73 20  
+0008B0  1  6C 6F 63 6B  
+0008CF  1  49 74 27 73  @e2:        .byte "It's too dark to go foward!",0
+0008D3  1  20 74 6F 6F  
+0008D7  1  20 64 61 72  
+0008EA  1               
