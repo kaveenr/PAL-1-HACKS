@@ -47,6 +47,9 @@
     ; Game State Variables
     
     GAMEP   =   $30         ; 2 byte game pointer
+    
+    ; Copied Directly From Game Pointer
+    
     GCADD   =   $34         ; GO Adress Common High byte
     GNADD   =   $35         ; GO Adress North Low byte
     GEADD   =   $36         ; GO Adress East Low byte
@@ -94,26 +97,24 @@ describe:   ldy #0          ; Loading GO Pointers
             sta GSADD
             jmp @next
 @match_w:   cpy #4
-            bne @endloop
+            bne @match_dh
             sta GWADD
+            jmp @next
+@match_dh:  cpy #5
+            bne @match_dl
+            sta DESCR
+            jmp @next
+@match_dl:  cpy #6
+            bne @endloop
+            sta DESCR+1
             jmp @endloop
 @next:      iny
             jmp @loop
 
-@endloop:   clc         ; Set String start to DESCR
-            lda GAMEP
-            adc #5
-            sta DESCR
-            lda GAMEP+1
-            adc #0
-            sta DESCR+1
-            
-            jsr PutCRLF ; Print Description
-            jsr PutCRLF
+@endloop:   jsr PutCRLF ; Print Description
             ldx DESCR
             ldy DESCR+1
             jsr PutStr
-            
     
             ; Prompt Verb
             ; Store Valid Verb First Char to CVERB
@@ -214,17 +215,9 @@ handle_g:   ldx CNOUN
             jsr PutStr
             jmp prompt
             
-@valid:     sta GAMEP+1
+@valid:     sta GAMEP
             lda GCADD
-            sta GAMEP
-            
-            jsr PutCRLF
-            ldx #<s_verb1   ; Verbose Decision 
-            ldy #>s_verb1                      
-            jsr PutStr
-            ldx #<INWORD
-            ldy #>INWORD                      
-            jsr PutStr
+            sta GAMEP+1
             
             jmp describe
             
@@ -255,7 +248,7 @@ handle_u:   ldx #<s_verb3
 ;
 
 s_hello:    .byte CR,LF,"Abirahasa Game Interpreter"
-            .byte CR,LF,"by Kaveen Rodrigo (2022)",0
+            .byte CR,LF,"by Kaveen Rodrigo (2022)",CR,LF,0
 s_prompt:   .byte CR,LF,">",0
 s_err1:     .byte " is not a valid verb",0
 s_err2:     .byte " is not a valid noun",0
@@ -324,13 +317,16 @@ GetWord:    stx SAVEX
             
 ;
 ; Game Data
-; Formatted as follows,
-; "ASCII" $0 %00000000 $00 $00 $00 $00 $00
 ;
 
-game:       .byte <@1,>@1,0,0,0
-            .byte "You're at the side of an empty road, north of you is a foot path..."
-            .byte CR,LF,"There is a sign that says 'Welcome To Abirahasa' next to the path"
-@1:         .byte 0,0,0,0,0
-            .byte "You walk along, to find a clearing with an old house, it looks uninhabited."
-            .byte CR,LF,"Shaking the door knob reveal that it's locked. Off to the left is an garage."
+game:       .byte >@1,<@1,0,0,0,<@t1,>@t1
+@1:         .byte >@2,0,0,0,<@2,<@t2,>@t2
+@2:         .byte 0,0,0,0,0,<@t3,>@t3
+
+@t1:        .byte "You're at the side of an empty road, north of you is a foot path..."
+            .byte CR,LF,"There is a sign that says 'Welcome To Abirahasa' next to the path",0
+@t2:        .byte "You walk along, to find a clearing with an old house, it looks uninhabited."
+            .byte CR,LF,"Shaking the door knob reveal that it's locked. Off to the left is an garage.",0
+@t3:        .byte "You walk into the garage to see an old Volkswagen Karmann Ghia covered in dust."
+            .byte CR,LF,"At the back is a bench with miscellaneous car parts and old computers."
+            .byte CR,LF,"You go closer to see a jar full of bolts and shining in it is a key!",0
