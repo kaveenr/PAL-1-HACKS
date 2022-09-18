@@ -48,8 +48,9 @@
     
     GAMEP   =   $30         ; 2 byte game pointer
     
-    ; Copied Directly From Game Pointer
+    ; Scene Defintion
     
+    ZGAME   =   $34         ; Shortcut ADDR for below
     GCADD   =   $34         ; GO Adress Common High byte
     GNADD   =   $35         ; GO Adress North Low byte
     GEADD   =   $36         ; GO Adress East Low byte
@@ -78,40 +79,14 @@ init:       ldx #<s_hello   ; Show Welcome Message
             lda #>game                    
             sta GAMEP+1 
 
-describe:   ldy #0          ; Loading GO Pointers
+describe:   ldy #0          ; Copy of scene to ZP
 @loop:      lda (GAMEP), y
-            cpy #0
-            bne @match_n
-            sta GCADD
-            jmp @next
-@match_n:   cpy #1
-            bne @match_e
-            sta GNADD
-            jmp @next
-@match_e:   cpy #2
-            bne @match_s
-            sta GEADD
-            jmp @next
-@match_s:   cpy #3
-            bne @match_w
-            sta GSADD
-            jmp @next
-@match_w:   cpy #4
-            bne @match_dh
-            sta GWADD
-            jmp @next
-@match_dh:  cpy #5
-            bne @match_dl
-            sta DESCR
-            jmp @next
-@match_dl:  cpy #6
-            bne @endloop
-            sta DESCR+1
-            jmp @endloop
-@next:      iny
-            jmp @loop
+            sta ZGAME, y
+            iny
+            cpy #7
+            bne @loop
 
-@endloop:   jsr PutCRLF ; Print Description
+@endloop:   jsr PutCRLF     ; Print Description
             ldx DESCR
             ldy DESCR+1
             jsr PutStr
@@ -133,6 +108,8 @@ prompt:     jsr PutCRLF
             beq @store
             cmp #'U'
             beq @store
+            cmp #'Q'
+            beq hault
             
 @failed:    jsr PutCRLF     ; Notify Bad Verb
             
