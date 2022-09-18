@@ -64,7 +64,7 @@ Current file: gametty.s
 000000r 1                   GWADD   =   ZGAME+4     ; GO Adress West Low byte
 000000r 1                   GPICK   =   ZGAME+5     ; Avaiable Pickup
 000000r 1                   GGDIR   =   ZGAME+6     ; Gated Direction
-000000r 1                   GGPICK  =   ZGAME+7     ; Gated Direction Key
+000000r 1                   GGPICK  =   ZGAME+7     ; Gated Direction Key Pick
 000000r 1                   GDESC   =   ZGAME+8     ; 2 byte address of description
 000000r 1                   GGERR   =   ZGAME+10    ; 2 byte address of error
 000000r 1               
@@ -84,306 +84,354 @@ Current file: gametty.s
 000000r 1               
 000000r 1                   .org    $0200
 000200  1               
-000200  1  A2 14        init:       ldx #<s_hello   ; Show Welcome Message
+000200  1  A2 C1        init:       ldx #<s_hello   ; Show Welcome Message
 000202  1  A0 03                    ldy #>s_hello
-000204  1  20 D4 03                 jsr PutStr
-000207  1  A9 06                    lda #<game      ; Set Game Scene Pointer
+000204  1  20 81 03                 jsr PutStr
+000207  1  A9 65                    lda #<game      ; Set Game Scene Pointer
 000209  1  85 30                    sta GAMEP
 00020B  1  A9 04                    lda #>game
 00020D  1  85 31                    sta GAMEP+1
-00020F  1               
-00020F  1  A0 00        describe:   ldy #0          ; Copy of scene to ZP
-000211  1  B1 30        @loop:      lda (GAMEP), y
-000213  1  99 33 00                 sta ZGAME, y
-000216  1  C8                       iny
-000217  1  C0 0C                    cpy #GRLEN+1
-000219  1  D0 F6                    bne @loop
-00021B  1               
-00021B  1  20 B3 03     @endloop:   jsr PutCRLF     ; Print Description
-00021E  1  A6 3B                    ldx GDESC
-000220  1  A4 3C                    ldy GDESC+1
-000222  1  20 D4 03                 jsr PutStr
-000225  1               
-000225  1                           ; Prompt Verb
-000225  1                           ; Store Valid Verb First Char to CVERB
-000225  1               
-000225  1  20 B3 03     prompt:     jsr PutCRLF
-000228  1  A2 4D                    ldx #<s_prompt
-00022A  1  A0 03                    ldy #>s_prompt
-00022C  1  20 D4 03                 jsr PutStr
-00022F  1               
-00022F  1  20 E6 03                 jsr GetWord     ; Get Word
-000232  1  A5 0A                    lda INWORD
-000234  1               
-000234  1  C9 47                    cmp #'G'        ; Check if valid verb
-000236  1  F0 20                    beq @store
-000238  1  C9 54                    cmp #'T'
-00023A  1  F0 1C                    beq @store
-00023C  1  C9 55                    cmp #'U'
-00023E  1  F0 18                    beq @store
-000240  1  C9 51                    cmp #'Q'
-000242  1  F0 33                    beq hault
-000244  1               
-000244  1  20 B3 03     @failed:    jsr PutCRLF     ; Notify Bad Verb
-000247  1               
-000247  1  A2 0A                    ldx #<INWORD
-000249  1  A0 00                    ldy #>INWORD
-00024B  1  20 D4 03                 jsr PutStr
-00024E  1               
-00024E  1  A2 51                    ldx #<s_err1
-000250  1  A0 03                    ldy #>s_err1
-000252  1  20 D4 03                 jsr PutStr
-000255  1               
-000255  1  4C 25 02                 jmp prompt      ; Return To Prompt
-000258  1               
-000258  1  A5 0A        @store:     lda INWORD      ; Store first char of verb
-00025A  1  85 08                    sta CVERB
+00020F  1  A9 00                    lda #0          ; Clear Game Vars
+000211  1  85 32                    sta CPICK
+000213  1               
+000213  1  A0 00        describe:   ldy #0          ; Copy of scene to ZP
+000215  1  B1 30        @loop:      lda (GAMEP), y
+000217  1  99 33 00                 sta ZGAME, y
+00021A  1  C8                       iny
+00021B  1  C0 0C                    cpy #GRLEN+1
+00021D  1  D0 F6                    bne @loop
+00021F  1               
+00021F  1  20 60 03     @endloop:   jsr PutCRLF     ; Print Description
+000222  1  A6 3B                    ldx GDESC
+000224  1  A4 3C                    ldy GDESC+1
+000226  1  20 81 03                 jsr PutStr
+000229  1               
+000229  1                           ; Prompt Verb
+000229  1                           ; Store Valid Verb First Char to CVERB
+000229  1               
+000229  1  20 60 03     prompt:     jsr PutCRLF
+00022C  1  A2 FA                    ldx #<s_prompt
+00022E  1  A0 03                    ldy #>s_prompt
+000230  1  20 81 03                 jsr PutStr
+000233  1               
+000233  1  20 A1 03                 jsr GetWord     ; Get Word
+000236  1  A5 0A                    lda INWORD
+000238  1               
+000238  1  C9 47                    cmp #'G'        ; Check if valid verb
+00023A  1  F0 20                    beq @store
+00023C  1  C9 54                    cmp #'T'
+00023E  1  F0 1C                    beq @store
+000240  1  C9 55                    cmp #'U'
+000242  1  F0 18                    beq @store
+000244  1  C9 51                    cmp #'Q'
+000246  1  F0 36                    beq hault
+000248  1               
+000248  1  20 60 03     @failed:    jsr PutCRLF     ; Notify Bad Verb
+00024B  1               
+00024B  1  A2 0A                    ldx #<INWORD
+00024D  1  A0 00                    ldy #>INWORD
+00024F  1  20 81 03                 jsr PutStr
+000252  1               
+000252  1  A2 FE                    ldx #<s_err1
+000254  1  A0 03                    ldy #>s_err1
+000256  1  20 81 03                 jsr PutStr
+000259  1               
+000259  1  4C 29 02                 jmp prompt      ; Return To Prompt
 00025C  1               
-00025C  1                           ; Prompt Noun
-00025C  1                           ; Store Noun First Char to CNOUN
-00025C  1               
-00025C  1  20 E6 03     prompt_n:   jsr GetWord     ; Get Word
-00025F  1  A5 0A                    lda INWORD
-000261  1  85 09                    sta CNOUN
-000263  1               
-000263  1  20 B3 03                 jsr PutCRLF
-000266  1               
-000266  1                           ; Switch Based On Noun
-000266  1               
-000266  1  A5 08                    lda CVERB
-000268  1  C9 47                    cmp #'G'
-00026A  1  F0 11                    beq handle_g
-00026C  1  C9 54                    cmp #'T'
-00026E  1  F0 65                    beq handle_t
-000270  1  C9 55                    cmp #'U'
-000272  1  F0 00                    beq @go_u
-000274  1               
-000274  1  4C 03 03     @go_u:      jmp handle_u
-000277  1               
-000277  1  20 B3 03     hault:      jsr PutCRLF
-00027A  1  4C 22 1C                 jmp kRST
-00027D  1               
-00027D  1                           ;
-00027D  1                           ; Handle Go
-00027D  1                           ;
-00027D  1               
-00027D  1  A6 09        handle_g:   ldx CNOUN
-00027F  1  E0 4E                    cpx #'N'
-000281  1  D0 05                    bne @match_e
-000283  1  A5 34                    lda GNADD
-000285  1  4C B4 02                 jmp @validnoun
-000288  1  E0 45        @match_e:   cpx #'E'
-00028A  1  D0 05                    bne @match_s
-00028C  1  A5 35                    lda GEADD
-00028E  1  4C B4 02                 jmp @validnoun
-000291  1  E0 53        @match_s:   cpx #'S'
-000293  1  D0 05                    bne @match_w
-000295  1  A5 36                    lda GSADD
-000297  1  4C B4 02                 jmp @validnoun
-00029A  1  E0 57        @match_w:   cpx #'W'
-00029C  1  D0 05                    bne @fail
-00029E  1  A5 37                    lda GWADD
-0002A0  1  4C B4 02                 jmp @validnoun
-0002A3  1               
-0002A3  1  A2 0A        @fail:      ldx #<INWORD    ; Verbose Wrong Noun
-0002A5  1  A0 00                    ldy #>INWORD
-0002A7  1  20 D4 03                 jsr PutStr
-0002AA  1  A2 66                    ldx #<s_err2
-0002AC  1  A0 03                    ldy #>s_err2
-0002AE  1  20 D4 03                 jsr PutStr
-0002B1  1  4C 25 02                 jmp prompt
-0002B4  1               
-0002B4  1  C9 00        @validnoun: cmp #0          ; Check if allowed
-0002B6  1  D0 14                    bne @valid
-0002B8  1               
-0002B8  1                           ; check gate
-0002B8  1               
-0002B8  1  20 B3 03                 jsr PutCRLF     ; Show invalid choice
-0002BB  1  A2 91                    ldx #<s_err3
-0002BD  1  A0 03                    ldy #>s_err3
-0002BF  1  20 D4 03                 jsr PutStr
-0002C2  1  A2 0A                    ldx #<INWORD
-0002C4  1  A0 00                    ldy #>INWORD
-0002C6  1  20 D4 03                 jsr PutStr
-0002C9  1  4C 25 02                 jmp prompt
-0002CC  1               
-0002CC  1  85 30        @valid:     sta GAMEP
-0002CE  1  A5 33                    lda GCADD
-0002D0  1  85 31                    sta GAMEP+1
-0002D2  1               
-0002D2  1  4C 0F 02                 jmp describe
-0002D5  1               
-0002D5  1                           ; Handle Take
-0002D5  1               
-0002D5  1  A5 38        handle_t:   lda GPICK
-0002D7  1  C9 00                    cmp #0
-0002D9  1  F0 17                    beq @fail
-0002DB  1  C5 0A                    cmp INWORD
-0002DD  1  D0 13                    bne @fail
-0002DF  1  85 32                    sta CPICK
-0002E1  1               
-0002E1  1  A2 82                    ldx #<s_verb2
-0002E3  1  A0 03                    ldy #>s_verb2
-0002E5  1  20 D4 03                 jsr PutStr
-0002E8  1  A2 0A                    ldx #<INWORD
-0002EA  1  A0 00                    ldy #>INWORD
-0002EC  1  20 D4 03                 jsr PutStr
-0002EF  1  4C 25 02                 jmp prompt
-0002F2  1               
-0002F2  1  A2 9B        @fail:      ldx #<s_err4
-0002F4  1  A0 03                    ldy #>s_err4
-0002F6  1  20 D4 03                 jsr PutStr
-0002F9  1  A2 0A                    ldx #<INWORD
-0002FB  1  A0 00                    ldy #>INWORD
-0002FD  1  20 D4 03                 jsr PutStr
-000300  1  4C 25 02                 jmp prompt
-000303  1               
-000303  1                           ;
-000303  1                           ; Handle Use
-000303  1                           ;
-000303  1               
-000303  1  A2 8A        handle_u:   ldx #<s_verb3
-000305  1  A0 03                    ldy #>s_verb3
-000307  1  20 D4 03                 jsr PutStr
-00030A  1  A2 0A                    ldx #<INWORD
-00030C  1  A0 00                    ldy #>INWORD
-00030E  1  20 D4 03                 jsr PutStr
-000311  1  4C 25 02                 jmp prompt
-000314  1               
-000314  1               ;
-000314  1               ; String/Char Constants
-000314  1               ;
-000314  1               
-000314  1  0D 0A 41 62  s_hello:    .byte CR,LF,"Abirahasa Game Interpreter"
-000318  1  69 72 61 68  
-00031C  1  61 73 61 20  
-000330  1  0D 0A 62 79              .byte CR,LF,"by Kaveen Rodrigo (2022)",CR,LF,0
-000334  1  20 4B 61 76  
-000338  1  65 65 6E 20  
-00034D  1  0D 0A 3E 00  s_prompt:   .byte CR,LF,">",0
-000351  1  20 69 73 20  s_err1:     .byte " is not a valid verb",0
-000355  1  6E 6F 74 20  
-000359  1  61 20 76 61  
-000366  1  20 69 73 20  s_err2:     .byte " is not a valid noun",0
-00036A  1  6E 6F 74 20  
-00036E  1  61 20 76 61  
-00037B  1  47 6F 69 6E  s_verb1:    .byte "Going ",0
-00037F  1  67 20 00     
-000382  1  54 61 6B 69  s_verb2:    .byte "Taking ",0
-000386  1  6E 67 20 00  
-00038A  1  55 73 69 6E  s_verb3:    .byte "Using ",0
-00038E  1  67 20 00     
-000391  1  43 61 6E 27  s_err3:     .byte "Can't go ",0
-000395  1  74 20 67 6F  
-000399  1  20 00        
-00039B  1  43 61 6E 27  s_err4:     .byte "Can't take ",0
-00039F  1  74 20 74 61  
-0003A3  1  6B 65 20 00  
-0003A7  1               
-0003A7  1               ;
-0003A7  1               ; TTY IO Routines
-0003A7  1               ;
-0003A7  1               
-0003A7  1  85 01        PutChar:    sta SAVEA
-0003A9  1  84 03                    sty SAVEY
-0003AB  1  20 A0 1E                 jsr kOUTCH
-0003AE  1  A4 03                    ldy SAVEY
-0003B0  1  A5 01                    lda SAVEA
-0003B2  1  60                       rts
-0003B3  1               
-0003B3  1  85 01        PutCRLF:    sta SAVEA
-0003B5  1  A9 0D                    lda #CR
-0003B7  1  20 A7 03                 jsr PutChar
-0003BA  1  A9 0A                    lda #LF
-0003BC  1  20 A7 03                 jsr PutChar
-0003BF  1  A5 01                    lda SAVEA
-0003C1  1  60                       rts
-0003C2  1               
-0003C2  1  84 03        PutPtrSTR:  sty SAVEY
-0003C4  1  A0 00                    ldy #0
-0003C6  1  B1 04        @loop:      lda (PRINTP), y
-0003C8  1  F0 07                    beq @stop
-0003CA  1  20 A7 03                 jsr PutChar
-0003CD  1  C8                       iny
-0003CE  1  4C C6 03                 jmp @loop
-0003D1  1  A4 03        @stop:      ldy SAVEY
-0003D3  1  60                       rts
-0003D4  1               
-0003D4  1  8A           PutStr:     txa
-0003D5  1  85 04                    sta PRINTP
-0003D7  1  98                       tya
-0003D8  1  85 05                    sta PRINTP+1
-0003DA  1  20 C2 03                 jsr PutPtrSTR
-0003DD  1  60                       rts
-0003DE  1               
-0003DE  1  84 03        GetChar:    sty SAVEY
-0003E0  1  20 5A 1E                 jsr kGETCH
-0003E3  1  A4 03                    ldy SAVEY
-0003E5  1  60                       rts
-0003E6  1               
-0003E6  1  86 02        GetWord:    stx SAVEX
-0003E8  1  85 01                    sta SAVEA
-0003EA  1  A2 00                    ldx #0
-0003EC  1  20 DE 03     @loop:      jsr GetChar
-0003EF  1  C9 20                    cmp #SP
-0003F1  1  F0 0A                    beq @stop
-0003F3  1  C9 0D                    cmp #CR
-0003F5  1  F0 06                    beq @stop
-0003F7  1  95 0A                    sta INWORD,X
-0003F9  1  E8                       inx
-0003FA  1  4C EC 03                 jmp @loop
-0003FD  1  A9 00        @stop:      lda #0
-0003FF  1  95 0A                    sta INWORD,X
-000401  1  A6 02                    ldx SAVEX
-000403  1  A5 01                    lda SAVEA
-000405  1  60                       rts
-000406  1               
-000406  1               ;
-000406  1               ; Game Data
-000406  1               ;
-000406  1                           ;      Ca    Na    Ea    Sa    Wa    Pc    Gd    Gl     Desc ptr.
-000406  1  04 10 00 00  game:       .byte (>@1),(<@1),(0  ),(0  ),(0  ),(0  ),(0  ),(0  ),  (<@t1),(>@t1)
-00040A  1  00 00 00 00  
-00040E  1  30 04        
-000410  1  04 26 00 00  @1:         .byte (>@2),(<@3),(0  ),(0  ),(<@2),(0  ),('N'),('K'),  (<@t2),(>@t2), (<@e1),(>@e1)
-000414  1  1C 00 4E 4B  
-000418  1  B7 04 25 06  
-00041C  1  00 00 00 00  @2:         .byte (0  ),(0  ),(0  ),(0  ),(0  ),('K'),(0  ),(0  ),  (<@t3),(>@t3)
-000420  1  00 4B 00 00  
-000424  1  51 05        
-000426  1  00 00 00 00  @3:         .byte (0  ),(0  ),(0  ),(0  ),(0  ),(0  ),(0  ),(0  ),  (<@t4),(>@t4)
-00042A  1  00 00 00 00  
-00042E  1  15 06        
-000430  1               
-000430  1  59 6F 75 27  @t1:        .byte "You're at the side of an empty road, north of you is a foot path..."
-000434  1  72 65 20 61  
-000438  1  74 20 74 68  
-000473  1  0D 0A 54 68              .byte CR,LF,"There is a sign that says 'Welcome To Abirahasa' next to the path",0
-000477  1  65 72 65 20  
-00047B  1  69 73 20 61  
-0004B7  1               
-0004B7  1  59 6F 75 20  @t2:        .byte "You walk along, to find a clearing with an old house, it looks uninhabited."
-0004BB  1  77 61 6C 6B  
-0004BF  1  20 61 6C 6F  
-000502  1  0D 0A 53 68              .byte CR,LF,"Shaking the door knob reveal that it's locked. Off to the left is an garage.",0
-000506  1  61 6B 69 6E  
-00050A  1  67 20 74 68  
-000551  1               
-000551  1  59 6F 75 20  @t3:        .byte "You walk into the garage to see an old Volkswagen Karmann Ghia covered in dust."
-000555  1  77 61 6C 6B  
-000559  1  20 69 6E 74  
-0005A0  1  0D 0A 41 74              .byte CR,LF,"At the back is a bench with broken car parts."
-0005A4  1  20 74 68 65  
-0005A8  1  20 62 61 63  
-0005CF  1  0D 0A 59 6F              .byte CR,LF,"You go closer to see a jar full of bolts... Shining in it is a key!",0
-0005D3  1  75 20 67 6F  
-0005D7  1  20 63 6C 6F  
-000615  1               
-000615  1  47 6F 74 20  @t4:        .byte "Got in the haus",0
-000619  1  69 6E 20 74  
-00061D  1  68 65 20 68  
-000625  1               
-000625  1  44 6F 6F 72  @e1:        .byte "Door is locked, you need a key!",0
-000629  1  20 69 73 20  
-00062D  1  6C 6F 63 6B  
-000644  1               
+00025C  1  A5 0A        @store:     lda INWORD      ; Store first char of verb
+00025E  1  85 08                    sta CVERB
+000260  1               
+000260  1                           ; Prompt Noun
+000260  1                           ; Store Noun First Char to CNOUN
+000260  1               
+000260  1  20 A1 03     prompt_n:   jsr GetWord     ; Get Word
+000263  1  A5 0A                    lda INWORD
+000265  1  85 09                    sta CNOUN
+000267  1               
+000267  1  20 60 03                 jsr PutCRLF
+00026A  1               
+00026A  1                           ; Switch Based On Noun
+00026A  1               
+00026A  1  A5 08                    lda CVERB
+00026C  1  C9 47                    cmp #'G'
+00026E  1  F0 14                    beq handle_g
+000270  1  C9 54                    cmp #'T'
+000272  1  F0 07                    beq @go_t
+000274  1  C9 55                    cmp #'U'
+000276  1  F0 00                    beq @go_u
+000278  1               
+000278  1  4C 21 03     @go_u:      jmp handle_u
+00027B  1  4C F3 02     @go_t:      jmp handle_t
+00027E  1               
+00027E  1  20 60 03     hault:      jsr PutCRLF
+000281  1  4C 22 1C                 jmp kRST
+000284  1               
+000284  1                           ;
+000284  1                           ; Handle Go
+000284  1                           ;
+000284  1               
+000284  1  A6 09        handle_g:   ldx CNOUN
+000286  1  E0 4E                    cpx #'N'
+000288  1  D0 05                    bne @match_e
+00028A  1  A5 34                    lda GNADD
+00028C  1  4C BB 02                 jmp @validnoun
+00028F  1  E0 45        @match_e:   cpx #'E'
+000291  1  D0 05                    bne @match_s
+000293  1  A5 35                    lda GEADD
+000295  1  4C BB 02                 jmp @validnoun
+000298  1  E0 53        @match_s:   cpx #'S'
+00029A  1  D0 05                    bne @match_w
+00029C  1  A5 36                    lda GSADD
+00029E  1  4C BB 02                 jmp @validnoun
+0002A1  1  E0 57        @match_w:   cpx #'W'
+0002A3  1  D0 05                    bne @fail
+0002A5  1  A5 37                    lda GWADD
+0002A7  1  4C BB 02                 jmp @validnoun
+0002AA  1               
+0002AA  1  A2 0A        @fail:      ldx #<INWORD    ; Verbose Wrong Noun
+0002AC  1  A0 00                    ldy #>INWORD
+0002AE  1  20 81 03                 jsr PutStr
+0002B1  1  A2 13                    ldx #<s_err2
+0002B3  1  A0 04                    ldy #>s_err2
+0002B5  1  20 81 03                 jsr PutStr
+0002B8  1  4C 29 02                 jmp prompt
+0002BB  1               
+0002BB  1  C9 00        @validnoun: cmp #0          ; Check if allowed
+0002BD  1  D0 14                    bne @valid
+0002BF  1               
+0002BF  1  20 60 03                 jsr PutCRLF     ; Show invalid choice
+0002C2  1  A2 30                    ldx #<s_err3
+0002C4  1  A0 04                    ldy #>s_err3
+0002C6  1  20 81 03                 jsr PutStr
+0002C9  1  A2 0A                    ldx #<INWORD
+0002CB  1  A0 00                    ldy #>INWORD
+0002CD  1  20 81 03                 jsr PutStr
+0002D0  1  4C 29 02                 jmp prompt
+0002D3  1               
+0002D3  1  E4 39        @valid:     cpx GGDIR       ; check if direc is gated
+0002D5  1  D0 13                    bne @move
+0002D7  1               
+0002D7  1  A6 3A                    ldx GGPICK      ; check if gate is fullfilled
+0002D9  1  E4 32                    cpx CPICK
+0002DB  1  F0 0D                    beq @move
+0002DD  1               
+0002DD  1  20 60 03                 jsr PutCRLF     ; Show gate fail
+0002E0  1  A6 3D                    ldx GGERR
+0002E2  1  A4 3E                    ldy GGERR+1
+0002E4  1  20 81 03                 jsr PutStr
+0002E7  1               
+0002E7  1  4C 29 02                 jmp prompt
+0002EA  1               
+0002EA  1  85 30        @move:      sta GAMEP
+0002EC  1  A5 33                    lda GCADD
+0002EE  1  85 31                    sta GAMEP+1
+0002F0  1  4C 13 02                 jmp describe
+0002F3  1               
+0002F3  1                           ;
+0002F3  1                           ; Handle Take
+0002F3  1                           ;
+0002F3  1               
+0002F3  1  A5 38        handle_t:   lda GPICK
+0002F5  1  C9 00                    cmp #0
+0002F7  1  F0 17                    beq @fail
+0002F9  1  C5 0A                    cmp INWORD
+0002FB  1  D0 13                    bne @fail
+0002FD  1  85 32                    sta CPICK
+0002FF  1               
+0002FF  1  A2 28                    ldx #<s_verb2
+000301  1  A0 04                    ldy #>s_verb2
+000303  1  20 81 03                 jsr PutStr
+000306  1  A2 0A                    ldx #<INWORD
+000308  1  A0 00                    ldy #>INWORD
+00030A  1  20 81 03                 jsr PutStr
+00030D  1  4C 29 02                 jmp prompt
+000310  1               
+000310  1  A2 3A        @fail:      ldx #<s_err4
+000312  1  A0 04                    ldy #>s_err4
+000314  1  20 81 03                 jsr PutStr
+000317  1  A2 0A                    ldx #<INWORD
+000319  1  A0 00                    ldy #>INWORD
+00031B  1  20 81 03                 jsr PutStr
+00031E  1  4C 29 02                 jmp prompt
+000321  1               
+000321  1                           ;
+000321  1                           ; Handle Use
+000321  1                           ;
+000321  1               
+000321  1  A5 32        handle_u:   lda CPICK       ; Check if a pickup is present
+000323  1  C9 00                    cmp #0
+000325  1  F0 0B                    beq @empty
+000327  1  C5 3A                    cmp GGPICK      ; check if pickup is usable
+000329  1  D0 18                    bne @invalid
+00032B  1               
+00032B  1  A5 39                    lda GGDIR
+00032D  1  85 09                    sta CNOUN
+00032F  1  4C 84 02                 jmp handle_g
+000332  1               
+000332  1  A2 46        @empty:     ldx #<s_err5
+000334  1  A0 04                    ldy #>s_err5
+000336  1  20 81 03                 jsr PutStr
+000339  1  A2 0A                    ldx #<INWORD
+00033B  1  A0 00                    ldy #>INWORD
+00033D  1  20 81 03                 jsr PutStr
+000340  1  4C 29 02                 jmp prompt
+000343  1               
+000343  1  A2 58        @invalid:   ldx #<s_err6
+000345  1  A0 04                    ldy #>s_err6
+000347  1  20 81 03                 jsr PutStr
+00034A  1  A2 0A                    ldx #<INWORD
+00034C  1  A0 00                    ldy #>INWORD
+00034E  1  20 81 03                 jsr PutStr
+000351  1  4C 29 02                 jmp prompt
+000354  1               
+000354  1               ;
+000354  1               ; TTY IO Routines
+000354  1               ;
+000354  1               
+000354  1  85 01        PutChar:    sta SAVEA
+000356  1  84 03                    sty SAVEY
+000358  1  20 A0 1E                 jsr kOUTCH
+00035B  1  A4 03                    ldy SAVEY
+00035D  1  A5 01                    lda SAVEA
+00035F  1  60                       rts
+000360  1               
+000360  1  85 01        PutCRLF:    sta SAVEA
+000362  1  A9 0D                    lda #CR
+000364  1  20 54 03                 jsr PutChar
+000367  1  A9 0A                    lda #LF
+000369  1  20 54 03                 jsr PutChar
+00036C  1  A5 01                    lda SAVEA
+00036E  1  60                       rts
+00036F  1               
+00036F  1  84 03        PutPtrSTR:  sty SAVEY
+000371  1  A0 00                    ldy #0
+000373  1  B1 04        @loop:      lda (PRINTP), y
+000375  1  F0 07                    beq @stop
+000377  1  20 54 03                 jsr PutChar
+00037A  1  C8                       iny
+00037B  1  4C 73 03                 jmp @loop
+00037E  1  A4 03        @stop:      ldy SAVEY
+000380  1  60                       rts
+000381  1               
+000381  1  8A           PutStr:     txa
+000382  1  85 04                    sta PRINTP
+000384  1  98                       tya
+000385  1  85 05                    sta PRINTP+1
+000387  1  20 6F 03                 jsr PutPtrSTR
+00038A  1  60                       rts
+00038B  1               
+00038B  1  84 03        GetChar:    sty SAVEY
+00038D  1  20 5A 1E                 jsr kGETCH
+000390  1  20 96 03                 jsr ToUpper
+000393  1  A4 03                    ldy SAVEY
+000395  1  60                       rts
+000396  1               
+000396  1  C9 61        ToUpper:    cmp #'a'
+000398  1  30 06                    bmi @skip
+00039A  1  C9 7B                    cmp #'z'+1
+00039C  1  10 02                    bpl @skip
+00039E  1  29 DF                    and #%11011111
+0003A0  1  60           @skip:      rts
+0003A1  1               
+0003A1  1  86 02        GetWord:    stx SAVEX
+0003A3  1  85 01                    sta SAVEA
+0003A5  1  A2 00                    ldx #0
+0003A7  1  20 8B 03     @loop:      jsr GetChar
+0003AA  1  C9 20                    cmp #SP
+0003AC  1  F0 0A                    beq @stop
+0003AE  1  C9 0D                    cmp #CR
+0003B0  1  F0 06                    beq @stop
+0003B2  1  95 0A                    sta INWORD,X
+0003B4  1  E8                       inx
+0003B5  1  4C A7 03                 jmp @loop
+0003B8  1  A9 00        @stop:      lda #0
+0003BA  1  95 0A                    sta INWORD,X
+0003BC  1  A6 02                    ldx SAVEX
+0003BE  1  A5 01                    lda SAVEA
+0003C0  1  60                       rts
+0003C1  1               
+0003C1  1               ;
+0003C1  1               ; String/Char Constants
+0003C1  1               ;
+0003C1  1               
+0003C1  1  0D 0A 41 62  s_hello:    .byte CR,LF,"Abirahasa Game Interpreter"
+0003C5  1  69 72 61 68  
+0003C9  1  61 73 61 20  
+0003DD  1  0D 0A 62 79              .byte CR,LF,"by Kaveen Rodrigo (2022)",CR,LF,0
+0003E1  1  20 4B 61 76  
+0003E5  1  65 65 6E 20  
+0003FA  1  0D 0A 3E 00  s_prompt:   .byte CR,LF,">",0
+0003FE  1  20 69 73 20  s_err1:     .byte " is not a valid verb",0
+000402  1  6E 6F 74 20  
+000406  1  61 20 76 61  
+000413  1  20 69 73 20  s_err2:     .byte " is not a valid noun",0
+000417  1  6E 6F 74 20  
+00041B  1  61 20 76 61  
+000428  1  54 61 6B 69  s_verb2:    .byte "Taking ",0
+00042C  1  6E 67 20 00  
+000430  1  43 61 6E 27  s_err3:     .byte "Can't go ",0
+000434  1  74 20 67 6F  
+000438  1  20 00        
+00043A  1  43 61 6E 27  s_err4:     .byte "Can't take ",0
+00043E  1  74 20 74 61  
+000442  1  6B 65 20 00  
+000446  1  59 6F 75 20  s_err5:     .byte "You don't have a ",0
+00044A  1  64 6F 6E 27  
+00044E  1  74 20 68 61  
+000458  1  43 61 6E 27  s_err6:     .byte "Can't use a ",0
+00045C  1  74 20 75 73  
+000460  1  65 20 61 20  
+000465  1               
+000465  1               
+000465  1               ;
+000465  1               ; Game Data
+000465  1               ;
+000465  1                           ;      Ca    Na    Ea    Sa    Wa    Pc    Gd    Gp     Desc ptr.
+000465  1  04 6F 00 00  game:       .byte (>@1),(<@1),(0  ),(0  ),(0  ),(0  ),(0  ),(0  ),  (<@t1),(>@t1)
+000469  1  00 00 00 00  
+00046D  1  8F 04        
+00046F  1  04 85 00 00  @1:         .byte (>@1),(<@3),(0  ),(0  ),(<@2),(0  ),('N'),('K'),  (<@t2),(>@t2), (<@e1),(>@e1)
+000473  1  7B 00 4E 4B  
+000477  1  17 05 E4 06  
+00047B  1  04 00 6F 00  @2:         .byte (>@1),(0  ),(<@1),(0  ),(0  ),('K'),(0  ),(0  ),  (<@t3),(>@t3)
+00047F  1  00 4B 00 00  
+000483  1  B1 05        
+000485  1  00 00 00 00  @3:         .byte (0  ),(0  ),(0  ),(0  ),(0  ),(0  ),(0  ),(0  ),  (<@t4),(>@t4)
+000489  1  00 00 00 00  
+00048D  1  75 06        
+00048F  1               
+00048F  1  59 6F 75 27  @t1:        .byte "You're at the side of an empty road, north of you is a foot path..."
+000493  1  72 65 20 61  
+000497  1  74 20 74 68  
+0004D2  1  0D 0A 54 68              .byte CR,LF,"There is a sign that says 'Welcome To Abirahasa' next to the path.",0
+0004D6  1  65 72 65 20  
+0004DA  1  69 73 20 61  
+000517  1               
+000517  1  59 6F 75 20  @t2:        .byte "You walk along, to find a clearing with an old house, it looks uninhabited."
+00051B  1  77 61 6C 6B  
+00051F  1  20 61 6C 6F  
+000562  1  0D 0A 53 68              .byte CR,LF,"Shaking the door knob reveal that it's locked. Off to the left is an garage.",0
+000566  1  61 6B 69 6E  
+00056A  1  67 20 74 68  
+0005B1  1               
+0005B1  1  59 6F 75 20  @t3:        .byte "You walk into the garage to see an old Volkswagen Karmann Ghia covered in dust."
+0005B5  1  77 61 6C 6B  
+0005B9  1  20 69 6E 74  
+000600  1  0D 0A 41 74              .byte CR,LF,"At the back is a bench with broken car parts."
+000604  1  20 74 68 65  
+000608  1  20 62 61 63  
+00062F  1  0D 0A 59 6F              .byte CR,LF,"You go closer to see a jar full of bolts... Shining in it is a key!",0
+000633  1  75 20 67 6F  
+000637  1  20 63 6C 6F  
+000675  1               
+000675  1  41 66 74 65  @t4:        .byte "After opening the door with hesitation, you're in an untidy living room."
+000679  1  72 20 6F 70  
+00067D  1  65 6E 69 6E  
+0006BD  1  0D 0A 54 4F              .byte CR,LF,"TODO says the ghost! Oooohohhohohoo!", 0
+0006C1  1  44 4F 20 73  
+0006C5  1  61 79 73 20  
+0006E4  1               
+0006E4  1  44 6F 6F 72  @e1:        .byte "Door is locked, you need to USE a key!",0
+0006E8  1  20 69 73 20  
+0006EC  1  6C 6F 63 6B  
+00070A  1               

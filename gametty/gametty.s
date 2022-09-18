@@ -60,7 +60,7 @@
     GWADD   =   ZGAME+4     ; GO Adress West Low byte
     GPICK   =   ZGAME+5     ; Avaiable Pickup
     GGDIR   =   ZGAME+6     ; Gated Direction
-    GGPICK  =   ZGAME+7     ; Gated Direction Key
+    GGPICK  =   ZGAME+7     ; Gated Direction Key Pick
     GDESC   =   ZGAME+8     ; 2 byte address of description
     GGERR   =   ZGAME+10    ; 2 byte address of error
 
@@ -87,6 +87,8 @@ init:       ldx #<s_hello   ; Show Welcome Message
             sta GAMEP                  
             lda #>game                    
             sta GAMEP+1 
+            lda #0          ; Clear Game Vars
+            sta CPICK
 
 describe:   ldy #0          ; Copy of scene to ZP
 @loop:      lda (GAMEP), y
@@ -150,11 +152,12 @@ prompt_n:   jsr GetWord     ; Get Word
             cmp #'G'
             beq handle_g
             cmp #'T'
-            beq handle_t
+            beq @go_t
             cmp #'U'
             beq @go_u
 
 @go_u:      jmp handle_u
+@go_t:      jmp handle_t
 
 hault:      jsr PutCRLF
             jmp kRST
@@ -191,8 +194,6 @@ handle_g:   ldx CNOUN
 
 @validnoun: cmp #0          ; Check if allowed
             bne @valid
-            
-            ; check gate
 
             jsr PutCRLF     ; Show invalid choice
             ldx #<s_err3
@@ -203,13 +204,28 @@ handle_g:   ldx CNOUN
             jsr PutStr
             jmp prompt
             
-@valid:     sta GAMEP
+@valid:     cpx GGDIR       ; check if direc is gated
+            bne @move
+            
+            ldx GGPICK      ; check if gate is fullfilled
+            cpx CPICK
+            beq @move
+            
+            jsr PutCRLF     ; Show gate fail
+            ldx GGERR
+            ldy GGERR+1                 
+            jsr PutStr
+            
+            jmp prompt
+
+@move:      sta GAMEP
             lda GCADD
             sta GAMEP+1
-            
             jmp describe
             
+            ;
             ; Handle Take
+            ;
             
 handle_t:   lda GPICK
             cmp #0
@@ -238,28 +254,31 @@ handle_t:   lda GPICK
             ; Handle Use
             ;
             
-handle_u:   ldx #<s_verb3
-            ldy #>s_verb3                      
+handle_u:   lda CPICK       ; Check if a pickup is present
+            cmp #0
+            beq @empty
+            cmp GGPICK      ; check if pickup is usable 
+            bne @invalid
+            
+            lda GGDIR
+            sta CNOUN
+            jmp handle_g
+
+@empty:     ldx #<s_err5
+            ldy #>s_err5                      
             jsr PutStr
             ldx #<INWORD
             ldy #>INWORD                      
             jsr PutStr
             jmp prompt
 
-;
-; String/Char Constants
-;
-
-s_hello:    .byte CR,LF,"Abirahasa Game Interpreter"
-            .byte CR,LF,"by Kaveen Rodrigo (2022)",CR,LF,0
-s_prompt:   .byte CR,LF,">",0
-s_err1:     .byte " is not a valid verb",0
-s_err2:     .byte " is not a valid noun",0
-s_verb1:    .byte "Going ",0
-s_verb2:    .byte "Taking ",0
-s_verb3:    .byte "Using ",0
-s_err3:     .byte "Can't go ",0
-s_err4:     .byte "Can't take ",0
+@invalid:   ldx #<s_err6
+            ldy #>s_err6                      
+            jsr PutStr
+            ldx #<INWORD
+            ldy #>INWORD                      
+            jsr PutStr
+            jmp prompt
 
 ;
 ; TTY IO Routines
@@ -299,8 +318,16 @@ PutStr:     txa
 
 GetChar:    sty SAVEY
             jsr kGETCH
+            jsr ToUpper
             ldy SAVEY
             rts
+
+ToUpper:    cmp #'a'
+            bmi @skip
+            cmp #'z'+1
+            bpl @skip
+            and #%11011111
+@skip:      rts
             
 GetWord:    stx SAVEX
             sta SAVEA
@@ -320,16 +347,32 @@ GetWord:    stx SAVEX
             rts
             
 ;
+; String/Char Constants
+;
+
+s_hello:    .byte CR,LF,"Abirahasa Game Interpreter"
+            .byte CR,LF,"by Kaveen Rodrigo (2022)",CR,LF,0
+s_prompt:   .byte CR,LF,">",0
+s_err1:     .byte " is not a valid verb",0
+s_err2:     .byte " is not a valid noun",0
+s_verb2:    .byte "Taking ",0
+s_err3:     .byte "Can't go ",0
+s_err4:     .byte "Can't take ",0
+s_err5:     .byte "You don't have a ",0
+s_err6:     .byte "Can't use a ",0
+
+
+;
 ; Game Data
 ;
-            ;      Ca    Na    Ea    Sa    Wa    Pc    Gd    Gl     Desc ptr.
+            ;      Ca    Na    Ea    Sa    Wa    Pc    Gd    Gp     Desc ptr. 
 game:       .byte (>@1),(<@1),(0  ),(0  ),(0  ),(0  ),(0  ),(0  ),  (<@t1),(>@t1)
-@1:         .byte (>@2),(<@3),(0  ),(0  ),(<@2),(0  ),('N'),('K'),  (<@t2),(>@t2), (<@e1),(>@e1)
-@2:         .byte (0  ),(0  ),(0  ),(0  ),(0  ),('K'),(0  ),(0  ),  (<@t3),(>@t3)
+@1:         .byte (>@1),(<@3),(0  ),(0  ),(<@2),(0  ),('N'),('K'),  (<@t2),(>@t2), (<@e1),(>@e1)
+@2:         .byte (>@1),(0  ),(<@1),(0  ),(0  ),('K'),(0  ),(0  ),  (<@t3),(>@t3)
 @3:         .byte (0  ),(0  ),(0  ),(0  ),(0  ),(0  ),(0  ),(0  ),  (<@t4),(>@t4)
 
 @t1:        .byte "You're at the side of an empty road, north of you is a foot path..."
-            .byte CR,LF,"There is a sign that says 'Welcome To Abirahasa' next to the path",0
+            .byte CR,LF,"There is a sign that says 'Welcome To Abirahasa' next to the path.",0
 
 @t2:        .byte "You walk along, to find a clearing with an old house, it looks uninhabited."
             .byte CR,LF,"Shaking the door knob reveal that it's locked. Off to the left is an garage.",0
@@ -338,6 +381,7 @@ game:       .byte (>@1),(<@1),(0  ),(0  ),(0  ),(0  ),(0  ),(0  ),  (<@t1),(>@t1
             .byte CR,LF,"At the back is a bench with broken car parts."
             .byte CR,LF,"You go closer to see a jar full of bolts... Shining in it is a key!",0
             
-@t4:        .byte "Got in the haus",0
+@t4:        .byte "After opening the door with hesitation, you're in an untidy living room."
+            .byte CR,LF,"TODO says the ghost! Oooohohhohohoo!", 0
             
-@e1:        .byte "Door is locked, you need a key!",0
+@e1:        .byte "Door is locked, you need to USE a key!",0
