@@ -50,16 +50,21 @@
     
     ; Scene Defintion
     
-    ZGAME   =   $34         ; Shortcut ADDR for below
-    GCADD   =   $34         ; GO Adress Common High byte
-    GNADD   =   $35         ; GO Adress North Low byte
-    GEADD   =   $36         ; GO Adress East Low byte
-    GSADD   =   $37         ; GO Adress South Low byte
-    GWADD   =   $38         ; GO Adress West Low byte
-    DESCR   =   $39         ; 2 byte address of description
+    ZGAME   =   $32         ; Shortcut ADDR for below
 
+    GCADD   =   ZGAME       ; GO Adress Common High byte
+    GNADD   =   ZGAME+1     ; GO Adress North Low byte
+    GEADD   =   ZGAME+2     ; GO Adress East Low byte
+    GSADD   =   ZGAME+3     ; GO Adress South Low byte
+    GWADD   =   ZGAME+4     ; GO Adress West Low byte
+    GPICK   =   ZGAME+5     ; Avaiable Pickup
+    GDESC   =   ZGAME+6     ; 2 byte address of description
+
+; Constants
+
+    GRLEN  =   7           ; len in bytes of record
     
-; ASCII Constants
+    ; ASCII
 
     CR      =   $0D         ; Carriage Return
     LF      =   $0A         ; Line Feed
@@ -83,12 +88,12 @@ describe:   ldy #0          ; Copy of scene to ZP
 @loop:      lda (GAMEP), y
             sta ZGAME, y
             iny
-            cpy #7
+            cpy #GRLEN+1
             bne @loop
 
 @endloop:   jsr PutCRLF     ; Print Description
-            ldx DESCR
-            ldy DESCR+1
+            ldx GDESC
+            ldy GDESC+1
             jsr PutStr
     
             ; Prompt Verb
@@ -200,8 +205,22 @@ handle_g:   ldx CNOUN
             
             ; Handle Take
             
-handle_t:   ldx #<s_verb2
+handle_t:   lda GPICK
+            cmp #0
+            beq @fail
+            cmp INWORD
+            bne @fail
+            
+            ldx #<s_verb2
             ldy #>s_verb2                      
+            jsr PutStr
+            ldx #<INWORD
+            ldy #>INWORD                      
+            jsr PutStr
+            jmp prompt
+
+@fail:      ldx #<s_err4
+            ldy #>s_err4                      
             jsr PutStr
             ldx #<INWORD
             ldy #>INWORD                      
@@ -232,7 +251,8 @@ s_err2:     .byte " is not a valid noun",0
 s_verb1:    .byte "Going ",0
 s_verb2:    .byte "Taking ",0
 s_verb3:    .byte "Using ",0
-s_err3:     .byte "Can't Go ",0
+s_err3:     .byte "Can't go ",0
+s_err4:     .byte "Can't take ",0
 
 ;
 ; TTY IO Routines
@@ -295,10 +315,10 @@ GetWord:    stx SAVEX
 ;
 ; Game Data
 ;
-
-game:       .byte >@1,<@1,0,0,0,<@t1,>@t1
-@1:         .byte >@2,0,0,0,<@2,<@t2,>@t2
-@2:         .byte 0,0,0,0,0,<@t3,>@t3
+            ;      Ca    Na    Ea    Sa    Wa    Pc    Desc ptr
+game:       .byte (>@1),(<@1),(0  ),(0  ),(0  ),(0  ),(<@t1),(>@t1)
+@1:         .byte (>@2),(0  ),(0  ),(0  ),(<@2),(0  ),(<@t2),(>@t2)
+@2:         .byte (0  ),(0  ),(0  ),(0  ),(0  ),('K'),(<@t3),(>@t3)
 
 @t1:        .byte "You're at the side of an empty road, north of you is a foot path..."
             .byte CR,LF,"There is a sign that says 'Welcome To Abirahasa' next to the path",0
@@ -307,3 +327,6 @@ game:       .byte >@1,<@1,0,0,0,<@t1,>@t1
 @t3:        .byte "You walk into the garage to see an old Volkswagen Karmann Ghia covered in dust."
             .byte CR,LF,"At the back is a bench with miscellaneous car parts and old computers."
             .byte CR,LF,"You go closer to see a jar full of bolts and shining in it is a key!",0
+            
+@te3:       .byte "Door is locked, you need a key!",0
+            .byte "it's too dark to goforth, you need a lamp'",0
