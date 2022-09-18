@@ -393,13 +393,13 @@ Current file: abirahasa.s
 00046E  1  A6 04        
 000470  1  04 86 00 00  @1:         .byte (>@1),(<@3),(0  ),(0  ),(<@2),(0  ),('N'),('K'),  (<@t2),(>@t2), (<@e1),(>@e1)
 000474  1  7C 00 4E 4B  
-000478  1  2E 05 A8 08  
+000478  1  2E 05 9B 08  
 00047C  1  04 00 70 00  @2:         .byte (>@1),(0  ),(<@1),(0  ),(0  ),('K'),(0  ),(0  ),  (<@t3),(>@t3)
 000480  1  00 4B 00 00  
 000484  1  C8 05        
 000486  1  04 9C 92 00  @3:         .byte (>@3),(<@5),(<@4),(0  ),(0  ),(0  ),('N'),('L'),  (<@t4),(>@t4), (<@e2),(>@e2)
 00048A  1  00 00 4E 4C  
-00048E  1  8C 06 CF 08  
+00048E  1  8C 06 C2 08  
 000492  1  04 00 00 00  @4:         .byte (>@3),(0  ),(0  ),(0  ),(<@3),('L'),(0  ),(0  ),  (<@t5),(>@t5)
 000496  1  86 4C 00 00  
 00049A  1  41 07        
@@ -448,20 +448,20 @@ Current file: abirahasa.s
 000794  1  65 20 63 6F  
 000798  1  76 65 72 20  
 0007C9  1               
-0007C9  1  57 69 74 68  @t6:        .byte "With the light of the lamp, you navigate to an open door way which leads down."
+0007C9  1  57 69 74 68  @t6:        .byte "With the lamp, you navigate to an open door way which leads down. You're shocked"
 0007CD  1  20 74 68 65  
-0007D1  1  20 6C 69 67  
-000817  1  0D 0A 54 68              .byte CR,LF,"The floorboards creak as you take every step. You're shocked to see a lit candle"
-00081B  1  65 20 66 6C  
-00081F  1  6F 6F 72 62  
-000869  1  0D 0A 6F 6E              .byte CR,LF,"on the table in the corner. No one seems to be here through!",0
-00086D  1  20 74 68 65  
-000871  1  20 74 61 62  
-0008A8  1               
-0008A8  1  44 6F 6F 72  @e1:        .byte "Door is locked, you need to USE a key!",0
-0008AC  1  20 69 73 20  
-0008B0  1  6C 6F 63 6B  
-0008CF  1  49 74 27 73  @e2:        .byte "It's too dark to go foward!",0
-0008D3  1  20 74 6F 6F  
-0008D7  1  20 64 61 72  
-0008EA  1               
+0007D1  1  20 6C 61 6D  
+000819  1  0D 0A 74 6F              .byte CR,LF,"to see a lit candle on a table in the corner. On it is a framed photo..."
+00081D  1  20 73 65 65  
+000821  1  20 61 20 6C  
+000863  1  0D 0A 59 6F              .byte CR,LF,"You're in it to!! You hear a sudden noise from behind",0
+000867  1  75 27 72 65  
+00086B  1  20 69 6E 20  
+00089B  1               
+00089B  1  44 6F 6F 72  @e1:        .byte "Door is locked, you need to USE a key!",0
+00089F  1  20 69 73 20  
+0008A3  1  6C 6F 63 6B  
+0008C2  1  49 74 27 73  @e2:        .byte "It's too dark to go foward!",0
+0008C6  1  20 74 6F 6F  
+0008CA  1  20 64 61 72  
+0008DD  1               

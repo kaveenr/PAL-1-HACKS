@@ -391,9 +391,9 @@ game:       .byte (>@1),(<@1),(0  ),(0  ),(0  ),(0  ),(0  ),(0  ),  (<@t1),(>@t1
 @t5:        .byte "You break the cobwebs and navigate to the kitchen, there is a book on the table"
             .byte CR,LF,"the cover seems familiar to you. Next to it is a lamp.",0
             
-@t6:        .byte "With the light of the lamp, you navigate to an open door way which leads down."
-            .byte CR,LF,"The floorboards creak as you take every step. You're shocked to see a lit candle"
-            .byte CR,LF,"on the table in the corner. No one seems to be here through!",0
+@t6:        .byte "With the lamp, you navigate to an open door way which leads down. You're shocked"
+            .byte CR,LF,"to see a lit candle on a table in the corner. On it is a framed photo..."
+            .byte CR,LF,"You're in it to!! You hear a sudden noise from behind",0
             
 @e1:        .byte "Door is locked, you need to USE a key!",0
 @e2:        .byte "It's too dark to go foward!",0
