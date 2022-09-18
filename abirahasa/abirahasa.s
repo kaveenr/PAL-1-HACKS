@@ -80,7 +80,8 @@
 
     .org    $0200 
 
-init:       ldx #<s_hello   ; Show Welcome Message
+init:       cld             ; Clear Decimal Mode 
+            ldx #<s_hello   ; Show Welcome Message
             ldy #>s_hello                      
             jsr PutStr
             lda #<game      ; Set Game Scene Pointer
