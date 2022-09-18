@@ -47,10 +47,11 @@
     ; Game State Variables
     
     GAMEP   =   $30         ; 2 byte game pointer
+    CPICK   =   $32         ; 1 byte char of pickup
     
     ; Scene Defintion
     
-    ZGAME   =   $32         ; Shortcut ADDR for below
+    ZGAME   =   $33         ; Shortcut ADDR for below
 
     GCADD   =   ZGAME       ; GO Adress Common High byte
     GNADD   =   ZGAME+1     ; GO Adress North Low byte
@@ -58,11 +59,14 @@
     GSADD   =   ZGAME+3     ; GO Adress South Low byte
     GWADD   =   ZGAME+4     ; GO Adress West Low byte
     GPICK   =   ZGAME+5     ; Avaiable Pickup
-    GDESC   =   ZGAME+6     ; 2 byte address of description
+    GGDIR   =   ZGAME+6     ; Gated Direction
+    GGPICK  =   ZGAME+7     ; Gated Direction Key
+    GDESC   =   ZGAME+8     ; 2 byte address of description
+    GGERR   =   ZGAME+10    ; 2 byte address of error
 
 ; Constants
 
-    GRLEN  =   7           ; len in bytes of record
+    GRLEN  =   11           ; len in bytes of record
     
     ; ASCII
 
@@ -187,6 +191,8 @@ handle_g:   ldx CNOUN
 
 @validnoun: cmp #0          ; Check if allowed
             bne @valid
+            
+            ; check gate
 
             jsr PutCRLF     ; Show invalid choice
             ldx #<s_err3
@@ -210,6 +216,7 @@ handle_t:   lda GPICK
             beq @fail
             cmp INWORD
             bne @fail
+            sta CPICK
             
             ldx #<s_verb2
             ldy #>s_verb2                      
@@ -315,18 +322,22 @@ GetWord:    stx SAVEX
 ;
 ; Game Data
 ;
-            ;      Ca    Na    Ea    Sa    Wa    Pc    Desc ptr
-game:       .byte (>@1),(<@1),(0  ),(0  ),(0  ),(0  ),(<@t1),(>@t1)
-@1:         .byte (>@2),(0  ),(0  ),(0  ),(<@2),(0  ),(<@t2),(>@t2)
-@2:         .byte (0  ),(0  ),(0  ),(0  ),(0  ),('K'),(<@t3),(>@t3)
+            ;      Ca    Na    Ea    Sa    Wa    Pc    Gd    Gl     Desc ptr.
+game:       .byte (>@1),(<@1),(0  ),(0  ),(0  ),(0  ),(0  ),(0  ),  (<@t1),(>@t1)
+@1:         .byte (>@2),(<@3),(0  ),(0  ),(<@2),(0  ),('N'),('K'),  (<@t2),(>@t2), (<@e1),(>@e1)
+@2:         .byte (0  ),(0  ),(0  ),(0  ),(0  ),('K'),(0  ),(0  ),  (<@t3),(>@t3)
+@3:         .byte (0  ),(0  ),(0  ),(0  ),(0  ),(0  ),(0  ),(0  ),  (<@t4),(>@t4)
 
 @t1:        .byte "You're at the side of an empty road, north of you is a foot path..."
             .byte CR,LF,"There is a sign that says 'Welcome To Abirahasa' next to the path",0
+
 @t2:        .byte "You walk along, to find a clearing with an old house, it looks uninhabited."
             .byte CR,LF,"Shaking the door knob reveal that it's locked. Off to the left is an garage.",0
+
 @t3:        .byte "You walk into the garage to see an old Volkswagen Karmann Ghia covered in dust."
-            .byte CR,LF,"At the back is a bench with miscellaneous car parts and old computers."
-            .byte CR,LF,"You go closer to see a jar full of bolts and shining in it is a key!",0
+            .byte CR,LF,"At the back is a bench with broken car parts."
+            .byte CR,LF,"You go closer to see a jar full of bolts... Shining in it is a key!",0
             
-@te3:       .byte "Door is locked, you need a key!",0
-            .byte "it's too dark to goforth, you need a lamp'",0
+@t4:        .byte "Got in the haus",0
+            
+@e1:        .byte "Door is locked, you need a key!",0
