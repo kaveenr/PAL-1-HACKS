@@ -26,8 +26,8 @@ Using KIM-1 ROM TTY related routines
 make -C hellotty
 ```
 
-### `gametty` -> Abirahasa Game Intpreter
-WIP, a text adventure game intepreter that works over TTY
+### `abirahasa` -> Abirahasa Game Intpreter
+A text adventure game intepreter that works over TTY
 ```
-make -C gametty
+make -C abirahasa
 ```
