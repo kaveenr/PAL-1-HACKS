@@ -10,14 +10,12 @@
 ; Scene
 ;   - Has Text Content
 ;   - Can Go Four Directions
-;   - Can backtrack flag
-;   - 8 Unqiue Item Pickup
-;   - Reusuable scenarios
+;   - Single Item Pickup
 
 ; Game State            Supported Verbs
-;   - Previous Scene        - GO
-;   - Current Scene         - TAKE
-;   - Pickups               - USE
+;   - Scene Pointer         - GO
+;   - Pickups               - TAKE
+;                           - USE
 ;
 
     .setcpu "6502"
@@ -67,6 +65,7 @@
 ; Constants
 
     GRLEN  =   11           ; len in bytes of record
+    GAME   =   $1000        ; Where in memory the game data is
     
     ; ASCII
 
@@ -84,9 +83,9 @@ init:       cld             ; Clear Decimal Mode
             ldx #<s_hello   ; Show Welcome Message
             ldy #>s_hello                      
             jsr PutStr
-            lda #<game      ; Set Game Scene Pointer
+            lda #<GAME      ; Set Game Scene Pointer
             sta GAMEP                  
-            lda #>game                    
+            lda #>GAME                    
             sta GAMEP+1 
             lda #0          ; Clear Game Vars
             sta CPICK
@@ -305,10 +304,20 @@ PutPtrSTR:  sty SAVEY
 @loop:      lda (PRINTP), y
             beq @stop                      
             jsr PutChar
-            iny                          
+            iny
+            beq @next                          
             jmp @loop                   
 @stop:      ldy SAVEY
             rts
+@next:      clc      
+            lda PRINTP
+            adc #$FF
+            sta PRINTP
+            
+            lda PRINTP+1
+            adc #$00 
+            sta PRINTP+1
+            jmp @loop
 
 PutStr:     txa
             sta PRINTP
@@ -361,39 +370,3 @@ s_err3:     .byte "Can't go ",0
 s_err4:     .byte "Can't take ",0
 s_err5:     .byte "You don't have a ",0
 s_err6:     .byte "Can't use a ",0
-
-
-;
-; Game Data
-;
-            ;      Ca    Na    Ea    Sa    Wa    Pc    Gd    Gp     Desc ptr. 
-game:       .byte (>@1),(<@1),(0  ),(0  ),(0  ),(0  ),(0  ),(0  ),  (<@t1),(>@t1)
-@1:         .byte (>@1),(<@3),(0  ),(0  ),(<@2),(0  ),('N'),('K'),  (<@t2),(>@t2), (<@e1),(>@e1)
-@2:         .byte (>@1),(0  ),(<@1),(0  ),(0  ),('K'),(0  ),(0  ),  (<@t3),(>@t3)
-@3:         .byte (>@3),(<@5),(<@4),(0  ),(0  ),(0  ),('N'),('L'),  (<@t4),(>@t4), (<@e2),(>@e2)
-@4:         .byte (>@3),(0  ),(0  ),(0  ),(<@3),('L'),(0  ),(0  ),  (<@t5),(>@t5)
-@5:         .byte (0  ),(0  ),(0  ),(0  ),(0  ),(0  ),(0  ),(0  ),  (<@t6),(>@t6)
-
-@t1:        .byte "You're at the side of an empty road, north of you is a foot path..."
-            .byte CR,LF,"There is a sign that says 'Welcome To Abirahasa' next to the path.",0
-
-@t2:        .byte "You walk along, to find a clearing with an old house, it looks uninhabited."
-            .byte CR,LF,"Shaking the door knob reveal that it's locked. Off to the left is an garage.",0
-
-@t3:        .byte "You walk into the garage to see an old Volkswagen Karmann Ghia covered in dust."
-            .byte CR,LF,"At the back is a bench with broken car parts."
-            .byte CR,LF,"You go closer to see a jar full of bolts... Shining in it is a key!",0
-            
-@t4:        .byte "With hesitation the door creaks open to a dingy and dusty living room..."
-            .byte CR,LF,"It's much bigger space that anticipated, ahead is darkness."
-            .byte CR,LF,"There seems to be a kitchen area to the right", 0
-
-@t5:        .byte "You break the cobwebs and navigate to the kitchen, there is a book on the table"
-            .byte CR,LF,"the cover seems familiar to you. Next to it is a lamp.",0
-            
-@t6:        .byte "With the lamp, you navigate to an open door way which leads down. You're shocked"
-            .byte CR,LF,"to see a lit candle on a table in the corner. On it is a framed photo..."
-            .byte CR,LF,"You're in it to!! You hear a sudden noise from behind",0
-            
-@e1:        .byte "Door is locked, you need to USE a key!",0
-@e2:        .byte "It's too dark to go foward!",0

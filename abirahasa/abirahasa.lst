@@ -14,14 +14,12 @@ Current file: abirahasa.s
 000000r 1               ; Scene
 000000r 1               ;   - Has Text Content
 000000r 1               ;   - Can Go Four Directions
-000000r 1               ;   - Can backtrack flag
-000000r 1               ;   - 8 Unqiue Item Pickup
-000000r 1               ;   - Reusuable scenarios
+000000r 1               ;   - Single Item Pickup
 000000r 1               
 000000r 1               ; Game State            Supported Verbs
-000000r 1               ;   - Previous Scene        - GO
-000000r 1               ;   - Current Scene         - TAKE
-000000r 1               ;   - Pickups               - USE
+000000r 1               ;   - Scene Pointer         - GO
+000000r 1               ;   - Pickups               - TAKE
+000000r 1               ;                           - USE
 000000r 1               ;
 000000r 1               
 000000r 1                   .setcpu "6502"
@@ -71,6 +69,7 @@ Current file: abirahasa.s
 000000r 1               ; Constants
 000000r 1               
 000000r 1                   GRLEN  =   11           ; len in bytes of record
+000000r 1                   GAME   =   $1000        ; Where in memory the game data is
 000000r 1               
 000000r 1                   ; ASCII
 000000r 1               
@@ -85,12 +84,12 @@ Current file: abirahasa.s
 000000r 1                   .org    $0200
 000200  1               
 000200  1  D8           init:       cld             ; Clear Decimal Mode
-000201  1  A2 C2                    ldx #<s_hello   ; Show Welcome Message
+000201  1  A2 D4                    ldx #<s_hello   ; Show Welcome Message
 000203  1  A0 03                    ldy #>s_hello
-000205  1  20 82 03                 jsr PutStr
-000208  1  A9 66                    lda #<game      ; Set Game Scene Pointer
+000205  1  20 94 03                 jsr PutStr
+000208  1  A9 00                    lda #<GAME      ; Set Game Scene Pointer
 00020A  1  85 30                    sta GAMEP
-00020C  1  A9 04                    lda #>game
+00020C  1  A9 10                    lda #>GAME
 00020E  1  85 31                    sta GAMEP+1
 000210  1  A9 00                    lda #0          ; Clear Game Vars
 000212  1  85 32                    sta CPICK
@@ -105,17 +104,17 @@ Current file: abirahasa.s
 000220  1  20 61 03     @endloop:   jsr PutCRLF     ; Print Description
 000223  1  A6 3B                    ldx GDESC
 000225  1  A4 3C                    ldy GDESC+1
-000227  1  20 82 03                 jsr PutStr
+000227  1  20 94 03                 jsr PutStr
 00022A  1               
 00022A  1                           ; Prompt Verb
 00022A  1                           ; Store Valid Verb First Char to CVERB
 00022A  1               
 00022A  1  20 61 03     prompt:     jsr PutCRLF
-00022D  1  A2 FB                    ldx #<s_prompt
-00022F  1  A0 03                    ldy #>s_prompt
-000231  1  20 82 03                 jsr PutStr
+00022D  1  A2 0D                    ldx #<s_prompt
+00022F  1  A0 04                    ldy #>s_prompt
+000231  1  20 94 03                 jsr PutStr
 000234  1               
-000234  1  20 A2 03                 jsr GetWord     ; Get Word
+000234  1  20 B4 03                 jsr GetWord     ; Get Word
 000237  1  A5 0A                    lda INWORD
 000239  1               
 000239  1  C9 47                    cmp #'G'        ; Check if valid verb
@@ -131,11 +130,11 @@ Current file: abirahasa.s
 00024C  1               
 00024C  1  A2 0A                    ldx #<INWORD
 00024E  1  A0 00                    ldy #>INWORD
-000250  1  20 82 03                 jsr PutStr
+000250  1  20 94 03                 jsr PutStr
 000253  1               
-000253  1  A2 FF                    ldx #<s_err1
-000255  1  A0 03                    ldy #>s_err1
-000257  1  20 82 03                 jsr PutStr
+000253  1  A2 11                    ldx #<s_err1
+000255  1  A0 04                    ldy #>s_err1
+000257  1  20 94 03                 jsr PutStr
 00025A  1               
 00025A  1  4C 2A 02                 jmp prompt      ; Return To Prompt
 00025D  1               
@@ -145,7 +144,7 @@ Current file: abirahasa.s
 000261  1                           ; Prompt Noun
 000261  1                           ; Store Noun First Char to CNOUN
 000261  1               
-000261  1  20 A2 03     prompt_n:   jsr GetWord     ; Get Word
+000261  1  20 B4 03     prompt_n:   jsr GetWord     ; Get Word
 000264  1  A5 0A                    lda INWORD
 000266  1  85 09                    sta CNOUN
 000268  1               
@@ -191,22 +190,22 @@ Current file: abirahasa.s
 0002AB  1               
 0002AB  1  A2 0A        @fail:      ldx #<INWORD    ; Verbose Wrong Noun
 0002AD  1  A0 00                    ldy #>INWORD
-0002AF  1  20 82 03                 jsr PutStr
-0002B2  1  A2 14                    ldx #<s_err2
+0002AF  1  20 94 03                 jsr PutStr
+0002B2  1  A2 26                    ldx #<s_err2
 0002B4  1  A0 04                    ldy #>s_err2
-0002B6  1  20 82 03                 jsr PutStr
+0002B6  1  20 94 03                 jsr PutStr
 0002B9  1  4C 2A 02                 jmp prompt
 0002BC  1               
 0002BC  1  C9 00        @validnoun: cmp #0          ; Check if allowed
 0002BE  1  D0 14                    bne @valid
 0002C0  1               
 0002C0  1  20 61 03                 jsr PutCRLF     ; Show invalid choice
-0002C3  1  A2 31                    ldx #<s_err3
+0002C3  1  A2 43                    ldx #<s_err3
 0002C5  1  A0 04                    ldy #>s_err3
-0002C7  1  20 82 03                 jsr PutStr
+0002C7  1  20 94 03                 jsr PutStr
 0002CA  1  A2 0A                    ldx #<INWORD
 0002CC  1  A0 00                    ldy #>INWORD
-0002CE  1  20 82 03                 jsr PutStr
+0002CE  1  20 94 03                 jsr PutStr
 0002D1  1  4C 2A 02                 jmp prompt
 0002D4  1               
 0002D4  1  E4 39        @valid:     cpx GGDIR       ; check if direc is gated
@@ -219,7 +218,7 @@ Current file: abirahasa.s
 0002DE  1  20 61 03                 jsr PutCRLF     ; Show gate fail
 0002E1  1  A6 3D                    ldx GGERR
 0002E3  1  A4 3E                    ldy GGERR+1
-0002E5  1  20 82 03                 jsr PutStr
+0002E5  1  20 94 03                 jsr PutStr
 0002E8  1               
 0002E8  1  4C 2A 02                 jmp prompt
 0002EB  1               
@@ -239,20 +238,20 @@ Current file: abirahasa.s
 0002FC  1  D0 13                    bne @fail
 0002FE  1  85 32                    sta CPICK
 000300  1               
-000300  1  A2 29                    ldx #<s_verb2
+000300  1  A2 3B                    ldx #<s_verb2
 000302  1  A0 04                    ldy #>s_verb2
-000304  1  20 82 03                 jsr PutStr
+000304  1  20 94 03                 jsr PutStr
 000307  1  A2 0A                    ldx #<INWORD
 000309  1  A0 00                    ldy #>INWORD
-00030B  1  20 82 03                 jsr PutStr
+00030B  1  20 94 03                 jsr PutStr
 00030E  1  4C 2A 02                 jmp prompt
 000311  1               
-000311  1  A2 3B        @fail:      ldx #<s_err4
+000311  1  A2 4D        @fail:      ldx #<s_err4
 000313  1  A0 04                    ldy #>s_err4
-000315  1  20 82 03                 jsr PutStr
+000315  1  20 94 03                 jsr PutStr
 000318  1  A2 0A                    ldx #<INWORD
 00031A  1  A0 00                    ldy #>INWORD
-00031C  1  20 82 03                 jsr PutStr
+00031C  1  20 94 03                 jsr PutStr
 00031F  1  4C 2A 02                 jmp prompt
 000322  1               
 000322  1                           ;
@@ -269,20 +268,20 @@ Current file: abirahasa.s
 00032E  1  85 09                    sta CNOUN
 000330  1  4C 85 02                 jmp handle_g
 000333  1               
-000333  1  A2 47        @empty:     ldx #<s_err5
+000333  1  A2 59        @empty:     ldx #<s_err5
 000335  1  A0 04                    ldy #>s_err5
-000337  1  20 82 03                 jsr PutStr
+000337  1  20 94 03                 jsr PutStr
 00033A  1  A2 0A                    ldx #<INWORD
 00033C  1  A0 00                    ldy #>INWORD
-00033E  1  20 82 03                 jsr PutStr
+00033E  1  20 94 03                 jsr PutStr
 000341  1  4C 2A 02                 jmp prompt
 000344  1               
-000344  1  A2 59        @invalid:   ldx #<s_err6
+000344  1  A2 6B        @invalid:   ldx #<s_err6
 000346  1  A0 04                    ldy #>s_err6
-000348  1  20 82 03                 jsr PutStr
+000348  1  20 94 03                 jsr PutStr
 00034B  1  A2 0A                    ldx #<INWORD
 00034D  1  A0 00                    ldy #>INWORD
-00034F  1  20 82 03                 jsr PutStr
+00034F  1  20 94 03                 jsr PutStr
 000352  1  4C 2A 02                 jmp prompt
 000355  1               
 000355  1               ;
@@ -307,161 +306,89 @@ Current file: abirahasa.s
 000370  1  84 03        PutPtrSTR:  sty SAVEY
 000372  1  A0 00                    ldy #0
 000374  1  B1 04        @loop:      lda (PRINTP), y
-000376  1  F0 07                    beq @stop
+000376  1  F0 09                    beq @stop
 000378  1  20 55 03                 jsr PutChar
 00037B  1  C8                       iny
-00037C  1  4C 74 03                 jmp @loop
-00037F  1  A4 03        @stop:      ldy SAVEY
-000381  1  60                       rts
-000382  1               
-000382  1  8A           PutStr:     txa
-000383  1  85 04                    sta PRINTP
-000385  1  98                       tya
-000386  1  85 05                    sta PRINTP+1
-000388  1  20 70 03                 jsr PutPtrSTR
-00038B  1  60                       rts
-00038C  1               
-00038C  1  84 03        GetChar:    sty SAVEY
-00038E  1  20 5A 1E                 jsr kGETCH
-000391  1  20 97 03                 jsr ToUpper
-000394  1  A4 03                    ldy SAVEY
-000396  1  60                       rts
-000397  1               
-000397  1  C9 61        ToUpper:    cmp #'a'
-000399  1  30 06                    bmi @skip
-00039B  1  C9 7B                    cmp #'z'+1
-00039D  1  10 02                    bpl @skip
-00039F  1  29 DF                    and #%11011111
-0003A1  1  60           @skip:      rts
-0003A2  1               
-0003A2  1  86 02        GetWord:    stx SAVEX
-0003A4  1  85 01                    sta SAVEA
-0003A6  1  A2 00                    ldx #0
-0003A8  1  20 8C 03     @loop:      jsr GetChar
-0003AB  1  C9 20                    cmp #SP
-0003AD  1  F0 0A                    beq @stop
-0003AF  1  C9 0D                    cmp #CR
-0003B1  1  F0 06                    beq @stop
-0003B3  1  95 0A                    sta INWORD,X
-0003B5  1  E8                       inx
-0003B6  1  4C A8 03                 jmp @loop
-0003B9  1  A9 00        @stop:      lda #0
-0003BB  1  95 0A                    sta INWORD,X
-0003BD  1  A6 02                    ldx SAVEX
-0003BF  1  A5 01                    lda SAVEA
-0003C1  1  60                       rts
-0003C2  1               
-0003C2  1               ;
-0003C2  1               ; String/Char Constants
-0003C2  1               ;
-0003C2  1               
-0003C2  1  0D 0A 41 62  s_hello:    .byte CR,LF,"Abirahasa Game Interpreter"
-0003C6  1  69 72 61 68  
-0003CA  1  61 73 61 20  
-0003DE  1  0D 0A 62 79              .byte CR,LF,"by Kaveen Rodrigo (2022)",CR,LF,0
-0003E2  1  20 4B 61 76  
-0003E6  1  65 65 6E 20  
-0003FB  1  0D 0A 3E 00  s_prompt:   .byte CR,LF,">",0
-0003FF  1  20 69 73 20  s_err1:     .byte " is not a valid verb",0
-000403  1  6E 6F 74 20  
-000407  1  61 20 76 61  
-000414  1  20 69 73 20  s_err2:     .byte " is not a valid noun",0
-000418  1  6E 6F 74 20  
-00041C  1  61 20 76 61  
-000429  1  54 61 6B 69  s_verb2:    .byte "Taking ",0
-00042D  1  6E 67 20 00  
-000431  1  43 61 6E 27  s_err3:     .byte "Can't go ",0
-000435  1  74 20 67 6F  
-000439  1  20 00        
-00043B  1  43 61 6E 27  s_err4:     .byte "Can't take ",0
-00043F  1  74 20 74 61  
-000443  1  6B 65 20 00  
-000447  1  59 6F 75 20  s_err5:     .byte "You don't have a ",0
-00044B  1  64 6F 6E 27  
-00044F  1  74 20 68 61  
-000459  1  43 61 6E 27  s_err6:     .byte "Can't use a ",0
-00045D  1  74 20 75 73  
-000461  1  65 20 61 20  
-000466  1               
-000466  1               
-000466  1               ;
-000466  1               ; Game Data
-000466  1               ;
-000466  1                           ;      Ca    Na    Ea    Sa    Wa    Pc    Gd    Gp     Desc ptr.
-000466  1  04 70 00 00  game:       .byte (>@1),(<@1),(0  ),(0  ),(0  ),(0  ),(0  ),(0  ),  (<@t1),(>@t1)
-00046A  1  00 00 00 00  
-00046E  1  A6 04        
-000470  1  04 86 00 00  @1:         .byte (>@1),(<@3),(0  ),(0  ),(<@2),(0  ),('N'),('K'),  (<@t2),(>@t2), (<@e1),(>@e1)
-000474  1  7C 00 4E 4B  
-000478  1  2E 05 9B 08  
-00047C  1  04 00 70 00  @2:         .byte (>@1),(0  ),(<@1),(0  ),(0  ),('K'),(0  ),(0  ),  (<@t3),(>@t3)
-000480  1  00 4B 00 00  
-000484  1  C8 05        
-000486  1  04 9C 92 00  @3:         .byte (>@3),(<@5),(<@4),(0  ),(0  ),(0  ),('N'),('L'),  (<@t4),(>@t4), (<@e2),(>@e2)
-00048A  1  00 00 4E 4C  
-00048E  1  8C 06 C2 08  
-000492  1  04 00 00 00  @4:         .byte (>@3),(0  ),(0  ),(0  ),(<@3),('L'),(0  ),(0  ),  (<@t5),(>@t5)
-000496  1  86 4C 00 00  
-00049A  1  41 07        
-00049C  1  00 00 00 00  @5:         .byte (0  ),(0  ),(0  ),(0  ),(0  ),(0  ),(0  ),(0  ),  (<@t6),(>@t6)
-0004A0  1  00 00 00 00  
-0004A4  1  C9 07        
-0004A6  1               
-0004A6  1  59 6F 75 27  @t1:        .byte "You're at the side of an empty road, north of you is a foot path..."
-0004AA  1  72 65 20 61  
-0004AE  1  74 20 74 68  
-0004E9  1  0D 0A 54 68              .byte CR,LF,"There is a sign that says 'Welcome To Abirahasa' next to the path.",0
-0004ED  1  65 72 65 20  
-0004F1  1  69 73 20 61  
-00052E  1               
-00052E  1  59 6F 75 20  @t2:        .byte "You walk along, to find a clearing with an old house, it looks uninhabited."
-000532  1  77 61 6C 6B  
-000536  1  20 61 6C 6F  
-000579  1  0D 0A 53 68              .byte CR,LF,"Shaking the door knob reveal that it's locked. Off to the left is an garage.",0
-00057D  1  61 6B 69 6E  
-000581  1  67 20 74 68  
-0005C8  1               
-0005C8  1  59 6F 75 20  @t3:        .byte "You walk into the garage to see an old Volkswagen Karmann Ghia covered in dust."
-0005CC  1  77 61 6C 6B  
-0005D0  1  20 69 6E 74  
-000617  1  0D 0A 41 74              .byte CR,LF,"At the back is a bench with broken car parts."
-00061B  1  20 74 68 65  
-00061F  1  20 62 61 63  
-000646  1  0D 0A 59 6F              .byte CR,LF,"You go closer to see a jar full of bolts... Shining in it is a key!",0
-00064A  1  75 20 67 6F  
-00064E  1  20 63 6C 6F  
-00068C  1               
-00068C  1  57 69 74 68  @t4:        .byte "With hesitation the door creaks open to a dingy and dusty living room..."
-000690  1  20 68 65 73  
-000694  1  69 74 61 74  
-0006D4  1  0D 0A 49 74              .byte CR,LF,"It's much bigger space that anticipated, ahead is darkness."
-0006D8  1  27 73 20 6D  
-0006DC  1  75 63 68 20  
-000711  1  0D 0A 54 68              .byte CR,LF,"There seems to be a kitchen area to the right", 0
-000715  1  65 72 65 20  
-000719  1  73 65 65 6D  
-000741  1               
-000741  1  59 6F 75 20  @t5:        .byte "You break the cobwebs and navigate to the kitchen, there is a book on the table"
-000745  1  62 72 65 61  
-000749  1  6B 20 74 68  
-000790  1  0D 0A 74 68              .byte CR,LF,"the cover seems familiar to you. Next to it is a lamp.",0
-000794  1  65 20 63 6F  
-000798  1  76 65 72 20  
-0007C9  1               
-0007C9  1  57 69 74 68  @t6:        .byte "With the lamp, you navigate to an open door way which leads down. You're shocked"
-0007CD  1  20 74 68 65  
-0007D1  1  20 6C 61 6D  
-000819  1  0D 0A 74 6F              .byte CR,LF,"to see a lit candle on a table in the corner. On it is a framed photo..."
-00081D  1  20 73 65 65  
-000821  1  20 61 20 6C  
-000863  1  0D 0A 59 6F              .byte CR,LF,"You're in it to!! You hear a sudden noise from behind",0
-000867  1  75 27 72 65  
-00086B  1  20 69 6E 20  
-00089B  1               
-00089B  1  44 6F 6F 72  @e1:        .byte "Door is locked, you need to USE a key!",0
-00089F  1  20 69 73 20  
-0008A3  1  6C 6F 63 6B  
-0008C2  1  49 74 27 73  @e2:        .byte "It's too dark to go foward!",0
-0008C6  1  20 74 6F 6F  
-0008CA  1  20 64 61 72  
-0008DD  1               
+00037C  1  F0 06                    beq @next
+00037E  1  4C 74 03                 jmp @loop
+000381  1  A4 03        @stop:      ldy SAVEY
+000383  1  60                       rts
+000384  1  18           @next:      clc
+000385  1  A5 04                    lda PRINTP
+000387  1  69 FF                    adc #$FF
+000389  1  85 04                    sta PRINTP
+00038B  1               
+00038B  1  A5 05                    lda PRINTP+1
+00038D  1  69 00                    adc #$00
+00038F  1  85 05                    sta PRINTP+1
+000391  1  4C 74 03                 jmp @loop
+000394  1               
+000394  1  8A           PutStr:     txa
+000395  1  85 04                    sta PRINTP
+000397  1  98                       tya
+000398  1  85 05                    sta PRINTP+1
+00039A  1  20 70 03                 jsr PutPtrSTR
+00039D  1  60                       rts
+00039E  1               
+00039E  1  84 03        GetChar:    sty SAVEY
+0003A0  1  20 5A 1E                 jsr kGETCH
+0003A3  1  20 A9 03                 jsr ToUpper
+0003A6  1  A4 03                    ldy SAVEY
+0003A8  1  60                       rts
+0003A9  1               
+0003A9  1  C9 61        ToUpper:    cmp #'a'
+0003AB  1  30 06                    bmi @skip
+0003AD  1  C9 7B                    cmp #'z'+1
+0003AF  1  10 02                    bpl @skip
+0003B1  1  29 DF                    and #%11011111
+0003B3  1  60           @skip:      rts
+0003B4  1               
+0003B4  1  86 02        GetWord:    stx SAVEX
+0003B6  1  85 01                    sta SAVEA
+0003B8  1  A2 00                    ldx #0
+0003BA  1  20 9E 03     @loop:      jsr GetChar
+0003BD  1  C9 20                    cmp #SP
+0003BF  1  F0 0A                    beq @stop
+0003C1  1  C9 0D                    cmp #CR
+0003C3  1  F0 06                    beq @stop
+0003C5  1  95 0A                    sta INWORD,X
+0003C7  1  E8                       inx
+0003C8  1  4C BA 03                 jmp @loop
+0003CB  1  A9 00        @stop:      lda #0
+0003CD  1  95 0A                    sta INWORD,X
+0003CF  1  A6 02                    ldx SAVEX
+0003D1  1  A5 01                    lda SAVEA
+0003D3  1  60                       rts
+0003D4  1               
+0003D4  1               ;
+0003D4  1               ; String/Char Constants
+0003D4  1               ;
+0003D4  1               
+0003D4  1  0D 0A 41 62  s_hello:    .byte CR,LF,"Abirahasa Game Interpreter"
+0003D8  1  69 72 61 68  
+0003DC  1  61 73 61 20  
+0003F0  1  0D 0A 62 79              .byte CR,LF,"by Kaveen Rodrigo (2022)",CR,LF,0
+0003F4  1  20 4B 61 76  
+0003F8  1  65 65 6E 20  
+00040D  1  0D 0A 3E 00  s_prompt:   .byte CR,LF,">",0
+000411  1  20 69 73 20  s_err1:     .byte " is not a valid verb",0
+000415  1  6E 6F 74 20  
+000419  1  61 20 76 61  
+000426  1  20 69 73 20  s_err2:     .byte " is not a valid noun",0
+00042A  1  6E 6F 74 20  
+00042E  1  61 20 76 61  
+00043B  1  54 61 6B 69  s_verb2:    .byte "Taking ",0
+00043F  1  6E 67 20 00  
+000443  1  43 61 6E 27  s_err3:     .byte "Can't go ",0
+000447  1  74 20 67 6F  
+00044B  1  20 00        
+00044D  1  43 61 6E 27  s_err4:     .byte "Can't take ",0
+000451  1  74 20 74 61  
+000455  1  6B 65 20 00  
+000459  1  59 6F 75 20  s_err5:     .byte "You don't have a ",0
+00045D  1  64 6F 6E 27  
+000461  1  74 20 68 61  
+00046B  1  43 61 6E 27  s_err6:     .byte "Can't use a ",0
+00046F  1  74 20 75 73  
+000473  1  65 20 61 20  
+000477  1               
