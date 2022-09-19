@@ -10,7 +10,7 @@ assemble:
 
 ptp: assemble
 	srec_cat abirahasa.bin -binary -offset 0x0200 -o ../abirahasa.ptp -MOS_Technologies -CRLF
-	srec_cat story1.bin -binary -offset 0x1000 -o ../abirahasa_story1.ptp -MOS_Technologies -CRLF
+	srec_cat story1.bin -binary -offset 0x0800 -o ../abirahasa_story1.ptp -MOS_Technologies -CRLF
 
 clean:
 	$(RM) abirahasa.o abirahasa.map abirahasa.bin

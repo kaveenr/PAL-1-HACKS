@@ -8,7 +8,7 @@ SP      =   $20         ; Space
 ; Game Data
 ;
 
-.org $1000
+.org $0800
 
 ; Loc   ;      Ca    Na    Ea    Sa    Wa    Pc    Gd    Gp     Desc ptr. 
 game:   .byte (>@1),(<@1),(0  ),(0  ),(0  ),(0  ),(0  ),(0  ),  (<@t1),(>@t1)

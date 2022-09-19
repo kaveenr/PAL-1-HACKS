@@ -23,7 +23,7 @@ make -C abirahasa
 
 1. First load interpreter `abirahasa.ptp`.
 2. Load a game file next such as `abirahasa_story1.ptp`.
-3. Start the interpreter at 0200 address.
+3. Start the interpreter at 0x0200 address.
 
 ### `hellotty` -> Demonstration Of KIM-1 TTY Routines
 Using KIM-1 ROM TTY related routines

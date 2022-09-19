@@ -65,7 +65,7 @@
 ; Constants
 
     GRLEN  =   11           ; len in bytes of record
-    GAME   =   $1000        ; Where in memory the game data is
+    GAME   =   $0800        ; Where in memory the game data is
     
     ; ASCII
 
