@@ -1,0 +1,99 @@
+#!/usr/local/bin/python3
+import argparse
+import yaml
+import tempfile
+import os
+
+DIRECTIONS = [ "north", "east", "south", "west" ]
+
+#
+# Argparser Configuration
+#
+parser = argparse.ArgumentParser(description='Abirahasa Composer')
+parser.add_argument('file', metavar='story', type=str, help='input story')
+parser.add_argument('out', metavar='outfile', type=str, help='output asm')
+args = parser.parse_args()
+infile = args.file
+outfile = args.out
+
+with open(infile, 'r') as file:
+    defintion = yaml.safe_load(file)
+    
+asm = [
+    "CR      =   $0D",
+    "LF      =   $0A",
+    ".org $0800",
+    "game:"
+]
+
+string_dict = dict()
+
+for scene in defintion:
+    cur = defintion[scene]
+    asm.append(f"@{scene}:")
+    line = f"\t.byte (>game),"
+    gate = None
+    gate_pickup = None
+    gate_text = None
+    
+    for direction in DIRECTIONS:
+        if direction in cur:
+            cur_c = cur[direction]
+            if (type(cur_c) == dict):
+                gate = direction
+                gate_pickup = cur_c["require"]
+                gate_text = cur_c["text"]
+                gate_to = cur_c["to"]
+                line += f"(<@{gate_to}),"
+            else:
+                line += f"(<@{cur[direction]}),"
+        else:
+            line += "(0  ),"
+    if "pickup" in cur:
+        pickup = cur["pickup"]
+        line += f"('{pickup[0].upper()}'),"
+    else:
+        line += "(0  ),"
+            
+    if gate:
+        line += f"('{gate[0].upper()}'),('{gate_pickup[0].upper()}'),"
+    else:
+        line += f"(0  ),(0  ),"
+    
+    line += f"(<@text_{scene}),(>@text_{scene})"
+    string_dict[f"text_{scene}"] = cur["text"]
+    
+    if gate:
+        line += f",(<@text_gate_{scene}),(>@text_gate_{scene})"
+        string_dict[f"text_gate_{scene}"] = gate_text
+    
+    asm.append(line)
+
+for key, text in string_dict.items():
+    asm.append(f"@{key}:")
+    parts = text.strip().split("\n")
+    for i,sentence in enumerate(parts):
+        line = "\t"
+        if i == 0:
+            line += f".byte \"{sentence}\""
+        else:
+            line += f".byte CR,LF,\"{sentence}\""
+        if i == len(parts)-1: line += ",0"
+        asm.append(line)
+
+#
+# Making the ptp
+#
+
+owd = os.getcwd()
+
+with tempfile.TemporaryDirectory() as tmpdirname:
+    os.chdir(tmpdirname)
+    fp = open("game.s", "w")
+    for line in asm:
+        fp.write(f"{line}\n")
+    fp.close()
+    os.system(f"ca65 -g -l game.lst {fp.name}")
+    os.system(f"ld65 -t none -vm -m game.map -o game.bin game.o")
+    os.system(f"srec_cat game.bin -binary -offset 0x0800 -o {os.path.join(owd,outfile)} -MOS_Technologies -CRLF")
+    

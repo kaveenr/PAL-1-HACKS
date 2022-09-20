@@ -1,0 +1,50 @@
+entrypoint:
+    text: |
+        You're at the side of an empty road, north of you is a foot path...
+        There is a sign that says 'Welcome To Abirahasa' next to the path.
+        Hazar the composer works!!!
+    north: pathway
+
+pathway:
+    text: |
+        You walk along, to find a clearing with an old house, it looks uninhabited.
+        Shaking the door knob reveal that it's locked. Off to the left is an garage.
+    north:
+        to: garage
+        require: key
+        text: |
+            Door is locked, you need to USE a key!
+    west: garage
+
+garage:
+    text: |
+        You walk into the garage to see an old Volkswagen Karmann Ghia covered in dust.
+        At the back is a bench with broken car parts.
+        You go closer to see a jar full of bolts... Shining in it is a key!
+    east: pathway
+    pickup: key
+
+home:
+    text: |
+        With hesitation the door creaks open to a dingy and dusty living room...
+        It's much bigger space that anticipated, ahead is darkness.
+        There seems to be a kitchen area to the right
+    north:
+        to: basement
+        require: lamp
+        text: |
+            It's too dark to go foward!
+    east: kitchen
+
+kitchen:
+    text: |
+        You break the cobwebs and navigate to the kitchen, there is a book on the table
+        the cover seems familiar to you. Next to it is a lamp.
+    west: home
+    pickup: lamp
+
+basement:
+    text: |
+        With the lamp, you navigate to an open door way which leads down. You're shocked
+        to see a lit candle on a table in the corner. On it is a framed photo...
+        You're in it too!! You hear a sudden noise from behind
