@@ -2,7 +2,6 @@ entrypoint:
     text: |
         You're at the side of an empty road, north of you is a foot path...
         There is a sign that says 'Welcome To Abirahasa' next to the path.
-        Hazar the composer works!!!
     north: pathway
 
 pathway:
@@ -10,7 +9,7 @@ pathway:
         You walk along, to find a clearing with an old house, it looks uninhabited.
         Shaking the door knob reveal that it's locked. Off to the left is an garage.
     north:
-        to: garage
+        to: home
         require: key
         text: |
             Door is locked, you need to USE a key!
@@ -45,6 +44,58 @@ kitchen:
 
 basement:
     text: |
-        With the lamp, you navigate to an open door way which leads down. You're shocked
-        to see a lit candle on a table in the corner. On it is a framed photo...
-        You're in it too!! You hear a sudden noise from behind
+        With the lamp, you navigate to an open door way which leads down. The basement
+        is mostly empty. In the corner you see an desk with a computer, there is power!
+        
+        After flicking the switch, it prompts 'Please Insert Boot Disk'. Drive B has a disc
+        but the Drive A is empty.
+        
+        Strangley, you hear noise and music from the living room.
+    north:
+        to: basement_comp
+        require: disc
+        text: |
+            The computer is blocking your path, The display reads,
+            'Please Insert Boot Disk'
+    south: h1_house
+            
+h1_house:
+    text: |
+        You run back up with confusion to a bright light, eyes closed you stride into
+        the living room to see that it's not the same. There are people partying, the
+        Hi-Fi is blasting music, you can't make out what's playing.
+        
+        Light headed, you sit down on the chair. You look towards the kitchen 
+        to see yourself reading!
+        
+        You look down and on the coffee table is a disk with the label 'CPM 2.2'
+    west:
+        to: h1_house
+        require: znoentry
+        text: |
+            You try to walk into the kitchen, but your head starts hurting. You fall
+            back to the chair.
+    pickup: disc
+    south: basement
+
+basement_comp:
+    text: |
+        You insert the disc into drive A of the computer. And the computer without
+        effort boots into CPM.
+        
+        You navigate to the second drive and find a file called README, it reads,
+        
+        Hey there, Welcome home!
+        You're not feeling that well, sometimes you forget where you are.
+        ###@###__
+        
+        The disk drive makes a loud screeching noise and the computer hangs up.
+        Your head hurts.. You hear rumbling of an engine from the living room
+    south: end_entrypoint
+    
+end_entrypoint:
+    text: |
+        You're at the side of an empty road, north of you is a foot path...
+        There is a sign that says 'Welcome To Abirahasa' next to the path.
+        
+        Thanks for playing!
