@@ -1,0 +1,56 @@
+ca65 V2.18 - N/A
+Main file   : paltimer.s
+Current file: paltimer.s
+
+000000r 1               ; # # # # # # # # # # # # #
+000000r 1               ; # Kaveen Rodrigo, 2022  #
+000000r 1               ; # ukr.lk                #
+000000r 1               ; # # # # # # # # # # # # #
+000000r 1               
+000000r 1               .setcpu "6502"
+000000r 1               
+000000r 1               ; RIOT Registers
+000000r 1               
+000000r 1               RIOT    =   $1740
+000000r 1               DRA     =   RIOT
+000000r 1               DDRA    =   RIOT+1
+000000r 1               DRB     =   RIOT+2
+000000r 1               DDRB    =   RIOT+3
+000000r 1               
+000000r 1               ; KIM-1 Display
+000000r 1               ; Port B Decoder LS145
+000000r 1               ; Port A 0-6 A to G
+000000r 1               ;
+000000r 1               ; 01000 digit 6 (L to R)     A  ---
+000000r 1               ; 01010 digit 5              F |   | B
+000000r 1               ; 01100 digit 4              G  ---
+000000r 1               ; 01110 digit 3              E |   | C
+000000r 1               ; 10000 digit 2              D  ---
+000000r 1               ; 10010 digit 1
+000000r 1               
+000000r 1               
+000000r 1               A_DIR   =   %01111000
+000000r 1               B_DIR   =   %11111110
+000000r 1               
+000000r 1               
+000000r 1                       .org     $0200
+000200  1               
+000200  1  A9 78        init:   lda #A_DIR
+000202  1  8D 41 17             sta DDRA
+000205  1  A9 FE                lda #B_DIR
+000207  1  8D 43 17             sta DDRB
+00020A  1               
+00020A  1  A2 64        draw:   ldx #100
+00020C  1  A0 00                ldy #0
+00020E  1  8A           @loop:  txa
+00020F  1  2A                   rol A
+000210  1  C9 14                cmp #%10100
+000212  1  F0 0C                beq @exit
+000214  1  8D 42 17             sta DRB
+000217  1  98                   tya
+000218  1  8D 40 17             sta DRA
+00021B  1  E8                   inx
+00021C  1  C8                   iny
+00021D  1  20 0E 02             jsr @loop
+000220  1  4C 0A 02     @exit:  jmp draw
+000220  1               

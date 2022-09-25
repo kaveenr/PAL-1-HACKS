@@ -14,6 +14,12 @@ Dump of 6502 Assembly code for the PAL-1 SBC.
 - Install minicom `brew install minicom`
 
 ## Programs
+### `paltimer` -> Adressing the RIOT
+**WIP** Learning how to use the RIOT in 6502 assembly.
+```
+make -C paltimer
+```
+
 ### `abirahasa` -> Abirahasa Game Interpreter
 A text adventure game interpreter that works over TTY
 ```
